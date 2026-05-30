@@ -369,7 +369,7 @@ export default function SqlCompare() {
       </div>
 
       {/* Editor Container */}
-      <div className="card overflow-hidden flex-1 border border-zinc-200 min-h-[450px]">
+      <div className="card overflow-hidden border border-zinc-200" style={{ height: '600px' }}>
         <DiffEditor
           height="100%"
           language="sql"
