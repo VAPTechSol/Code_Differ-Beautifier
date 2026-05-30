@@ -30,17 +30,17 @@ function App() {
         
         {/* Brand Logo */}
         <div className="flex items-center gap-2.5 shrink-0">
-          <div className="p-1.5 bg-black rounded-lg text-white shadow-sm flex items-center justify-center">
+          <div className="p-1.5 bg-zinc-900 border border-zinc-800 rounded-lg text-indigo-400 shadow-[0_0_12px_rgba(99,102,241,0.25)] flex items-center justify-center">
             <Code2 size={18} />
           </div>
           <div>
-            <span className="font-bold text-base tracking-tight text-zinc-950 block leading-none">Klarity</span>
+            <span className="font-bold text-base tracking-tight text-white block leading-none">Klarity</span>
             <span className="text-[9px] text-zinc-400 font-bold tracking-wider uppercase mt-1 block">Premium Dev Suite</span>
           </div>
         </div>
 
         {/* Navigation Pills */}
-        <nav className="flex items-center bg-zinc-100 p-1 rounded-xl border border-zinc-200/50">
+        <nav className="flex items-center bg-zinc-950 p-1 rounded-xl border border-zinc-800">
           {navigationItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -50,11 +50,11 @@ function App() {
                 onClick={() => setActiveTab(item.id)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-left transition-all ${
                   isActive
-                    ? 'active bg-white text-zinc-950 font-semibold shadow-sm border border-zinc-200/40'
-                    : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50/50'
+                    ? 'active bg-white/5 text-white font-semibold shadow-sm border border-zinc-800'
+                    : 'text-zinc-400 hover:text-white hover:bg-white/5'
                 }`}
               >
-                <Icon size={14} className={isActive ? 'text-black' : 'text-zinc-400'} />
+                <Icon size={14} className={isActive ? 'text-indigo-400' : 'text-zinc-400'} />
                 <span className="text-xs font-semibold leading-none">{item.label}</span>
               </button>
             );
@@ -63,7 +63,7 @@ function App() {
 
         {/* Status Indicator & Links */}
         <div className="flex items-center gap-6 shrink-0">
-          <div className="hidden md:flex items-center gap-2 text-xs font-semibold tracking-wider text-zinc-400 uppercase bg-zinc-50 px-3 py-1.5 rounded-full border border-zinc-100">
+          <div className="hidden md:flex items-center gap-2 text-xs font-semibold tracking-wider text-zinc-400 uppercase bg-zinc-950 px-3 py-1.5 rounded-full border border-zinc-800">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
             <span>Status: Ready</span>
           </div>
@@ -72,7 +72,7 @@ function App() {
             href="https://github.com" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="text-xs text-zinc-400 hover:text-zinc-900 font-medium flex items-center gap-1 transition-colors"
+            className="text-xs text-zinc-400 hover:text-white font-medium flex items-center gap-1 transition-colors"
           >
             <span>Docs</span>
             <ExternalLink size={11} />
