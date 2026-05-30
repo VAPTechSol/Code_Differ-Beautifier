@@ -23,8 +23,11 @@ function App() {
   ];
 
   return (
-    <div className="app-container font-sans flex flex-col min-h-screen text-zinc-900 bg-zinc-50">
+    <div className="app-container font-sans flex flex-col min-h-screen text-zinc-100">
       
+      {/* Background Glow Blobs */}
+      <div className="glow-blob glow-blob-1"></div>
+      <div className="glow-blob glow-blob-2"></div>
       {/* Top Premium Navbar */}
       <header className="header sticky top-0 z-40 bg-white border-b border-zinc-200/80 px-6 md:px-10 flex items-center justify-between">
         
@@ -90,14 +93,14 @@ function App() {
       </main>
 
       {/* Modern Compact Footer */}
-      <footer className="bg-white border-t border-zinc-200/80 py-4 px-6 md:px-10 flex flex-col sm:flex-row items-center justify-between text-[11px] text-zinc-400">
+      <footer className="bg-white border-t border-zinc-800 py-4 px-6 md:px-10 flex flex-col sm:flex-row items-center justify-between text-[11px] text-zinc-500">
         <div>
           © {new Date().getFullYear()} Klarity Devtools. All rights reserved.
         </div>
         <div className="flex items-center gap-4 mt-2 sm:mt-0 font-medium">
           <span>Version 1.1.0</span>
-          <span className="text-zinc-300">|</span>
-          <span className="text-zinc-400">Premium minimalist utility engine. Built for performance.</span>
+          <span className="text-zinc-700">|</span>
+          <span className="text-zinc-500">Premium minimalist utility engine. Built for performance.</span>
         </div>
       </footer>
     </div>
