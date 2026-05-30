@@ -314,9 +314,9 @@ export default function Beautifier() {
   };
 
   return (
-    <div className="animate-fade-in flex flex-col gap-5 h-full">
+    <div className="animate-fade-in flex flex-col gap-4 flex-1 min-h-0">
       {/* Settings bar */}
-      <div className="card bg-white flex flex-col overflow-hidden border border-zinc-200">
+      <div className="card bg-white flex flex-col overflow-hidden border border-zinc-200 shrink-0">
         <div className="p-4 flex flex-wrap items-center justify-between gap-4 border-b border-zinc-100">
           <div className="flex flex-wrap items-center gap-6">
             <div className="flex flex-col gap-1">
@@ -523,7 +523,7 @@ export default function Beautifier() {
       </div>
 
       {/* Editor Panels */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5" style={{ height: '600px' }}>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1 min-h-0">
         {/* Input Panel */}
         <div className="card dark-editor-card flex flex-col overflow-hidden">
           <div className="border-b border-zinc-900 p-3 dark-terminal-header flex items-center justify-between">
@@ -543,7 +543,7 @@ export default function Beautifier() {
               language={language === 'typescript' ? 'typescript' : language === 'json' ? 'json' : language}
               value={inputCode}
               onMount={handleInputMount}
-              theme="vs-dark"
+              theme="vs"
               options={{
                 minimap: { enabled: false },
                 fontSize: 13,
@@ -594,7 +594,7 @@ export default function Beautifier() {
               height="100%"
               language={language === 'typescript' ? 'typescript' : language === 'json' ? 'json' : language}
               value={outputCode}
-              theme="vs-dark"
+              theme="vs"
               options={{
                 readOnly: true,
                 minimap: { enabled: true },

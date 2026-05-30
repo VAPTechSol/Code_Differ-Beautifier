@@ -1,11 +1,11 @@
 {
   "name": "code-differ-beautifier",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "node increment-version.js && tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },

@@ -173,9 +173,9 @@ export default function CodeDiff() {
   };
 
   return (
-    <div className="animate-fade-in flex flex-col gap-5 h-full">
+    <div className="animate-fade-in flex flex-col gap-4 flex-1 min-h-0">
       {/* Control bar */}
-      <div className="card p-4 flex flex-wrap items-center justify-between gap-4">
+      <div className="card p-3 flex flex-wrap items-center justify-between gap-4 shrink-0">
         <div className="flex items-center gap-4">
           <div className="flex flex-col gap-1">
             <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Language</span>
@@ -293,14 +293,14 @@ export default function CodeDiff() {
       </div>
 
       {/* Editor Container */}
-      <div className="card dark-editor-card overflow-hidden" style={{ height: '600px' }}>
+      <div className="card dark-editor-card overflow-hidden flex-1 min-h-0">
         <DiffEditor
           height="100%"
           language={language}
           original={originalCode}
           modified={modifiedCode}
           onMount={handleEditorMount}
-          theme="vs-dark" // Premium dark high contrast theme
+          theme="vs"
           options={{
             renderSideBySide: splitView,
             minimap: { enabled: true },

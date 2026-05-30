@@ -146,9 +146,9 @@ export default function SqlCompare() {
   };
 
   return (
-    <div className="animate-fade-in flex flex-col gap-5 h-full">
+    <div className="animate-fade-in flex flex-col gap-4 flex-1 min-h-0">
       {/* SQL Compare Settings Toolbar */}
-      <div className="card bg-white flex flex-col overflow-hidden border border-zinc-200">
+      <div className="card bg-white flex flex-col overflow-hidden border border-zinc-200 shrink-0">
         <div className="p-4 flex flex-wrap items-center justify-between gap-4 border-b border-zinc-100">
           <div className="flex flex-wrap items-center gap-6">
             <div className="flex flex-col gap-1">
@@ -369,14 +369,14 @@ export default function SqlCompare() {
       </div>
 
       {/* Editor Container */}
-      <div className="card dark-editor-card overflow-hidden" style={{ height: '600px' }}>
+      <div className="card dark-editor-card overflow-hidden flex-1 min-h-0">
         <DiffEditor
           height="100%"
           language="sql"
           original={displayOriginal}
           modified={displayModified}
           onMount={handleEditorMount}
-          theme="vs-dark"
+          theme="vs"
           options={{
             renderSideBySide: true,
             minimap: { enabled: true },
