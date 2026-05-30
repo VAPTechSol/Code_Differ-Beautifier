@@ -328,55 +328,55 @@ export default function SqlCompare() {
       {/* SQL Headers */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Original SQL Card */}
-        <div className="card p-3 flex items-center justify-between bg-zinc-50/50">
+        <div className="card p-3 flex items-center justify-between dark-terminal-header">
           <div className="flex items-center gap-3">
             <div className="hidden sm:flex items-center gap-1.5 mr-1">
               <span className="window-dot window-dot-red"></span>
               <span className="window-dot window-dot-yellow"></span>
               <span className="window-dot window-dot-green"></span>
             </div>
-            <Database size={16} className="text-zinc-500" />
+            <Database size={16} className="text-zinc-400" />
             <span className="font-semibold text-sm">Original SQL Query</span>
           </div>
           <button 
             onClick={() => copyToClipboard(displayOriginal, setCopiedOriginal)} 
-            className="btn-secondary py-1 px-2.5 text-xs"
+            className="btn-terminal"
           >
-            {copiedOriginal ? <Check size={12} className="text-green-600" /> : <Copy size={12} />}
+            {copiedOriginal ? <Check size={12} className="text-green-500" /> : <Copy size={12} />}
             <span className="ml-1">{copiedOriginal ? 'Copied' : 'Copy'}</span>
           </button>
         </div>
 
         {/* Modified SQL Card */}
-        <div className="card p-3 flex items-center justify-between bg-zinc-50/50">
+        <div className="card p-3 flex items-center justify-between dark-terminal-header">
           <div className="flex items-center gap-3">
             <div className="hidden sm:flex items-center gap-1.5 mr-1">
               <span className="window-dot window-dot-red"></span>
               <span className="window-dot window-dot-yellow"></span>
               <span className="window-dot window-dot-green"></span>
             </div>
-            <Database size={16} className="text-zinc-500" />
+            <Database size={16} className="text-zinc-400" />
             <span className="font-semibold text-sm">Modified SQL Query</span>
           </div>
           <button 
             onClick={() => copyToClipboard(displayModified, setCopiedModified)} 
-            className="btn-secondary py-1 px-2.5 text-xs"
+            className="btn-terminal"
           >
-            {copiedModified ? <Check size={12} className="text-green-600" /> : <Copy size={12} />}
+            {copiedModified ? <Check size={12} className="text-green-500" /> : <Copy size={12} />}
             <span className="ml-1">{copiedModified ? 'Copied' : 'Copy'}</span>
           </button>
         </div>
       </div>
 
       {/* Editor Container */}
-      <div className="card overflow-hidden border border-zinc-200" style={{ height: '600px' }}>
+      <div className="card dark-editor-card overflow-hidden" style={{ height: '600px' }}>
         <DiffEditor
           height="100%"
           language="sql"
           original={displayOriginal}
           modified={displayModified}
           onMount={handleEditorMount}
-          theme="vs"
+          theme="vs-dark"
           options={{
             renderSideBySide: true,
             minimap: { enabled: true },

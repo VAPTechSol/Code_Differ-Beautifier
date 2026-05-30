@@ -228,18 +228,18 @@ export default function CodeDiff() {
       {/* Editor Panels Info & Action Buttons */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Original Code Header */}
-        <div className="card p-3 flex items-center justify-between bg-zinc-50/50">
+        <div className="card p-3 flex items-center justify-between dark-terminal-header">
           <div className="flex items-center gap-3">
             <div className="hidden sm:flex items-center gap-1.5 mr-1">
               <span className="window-dot window-dot-red"></span>
               <span className="window-dot window-dot-yellow"></span>
               <span className="window-dot window-dot-green"></span>
             </div>
-            <FileText size={16} className="text-zinc-500" />
+            <FileText size={16} className="text-zinc-400" />
             <span className="font-semibold text-sm">Original Code</span>
           </div>
           <div className="flex items-center gap-2">
-            <label className="btn-secondary py-1 px-2.5 text-xs cursor-pointer">
+            <label className="btn-terminal cursor-pointer">
               <Upload size={12} className="mr-1" />
               Upload
               <input 
@@ -251,27 +251,27 @@ export default function CodeDiff() {
             </label>
             <button 
               onClick={() => copyToClipboard(originalCode, setCopiedOriginal)} 
-              className="btn-secondary py-1 px-2.5 text-xs"
+              className="btn-terminal"
             >
-              {copiedOriginal ? <Check size={12} className="text-green-600" /> : <Copy size={12} />}
+              {copiedOriginal ? <Check size={12} className="text-green-500" /> : <Copy size={12} />}
               <span className="ml-1">{copiedOriginal ? 'Copied' : 'Copy'}</span>
             </button>
           </div>
         </div>
 
         {/* Modified Code Header */}
-        <div className="card p-3 flex items-center justify-between bg-zinc-50/50">
+        <div className="card p-3 flex items-center justify-between dark-terminal-header">
           <div className="flex items-center gap-3">
             <div className="hidden sm:flex items-center gap-1.5 mr-1">
               <span className="window-dot window-dot-red"></span>
               <span className="window-dot window-dot-yellow"></span>
               <span className="window-dot window-dot-green"></span>
             </div>
-            <FileText size={16} className="text-zinc-500" />
+            <FileText size={16} className="text-zinc-400" />
             <span className="font-semibold text-sm">Modified Code</span>
           </div>
           <div className="flex items-center gap-2">
-            <label className="btn-secondary py-1 px-2.5 text-xs cursor-pointer">
+            <label className="btn-terminal cursor-pointer">
               <Upload size={12} className="mr-1" />
               Upload
               <input 
@@ -283,9 +283,9 @@ export default function CodeDiff() {
             </label>
             <button 
               onClick={() => copyToClipboard(modifiedCode, setCopiedModified)} 
-              className="btn-secondary py-1 px-2.5 text-xs"
+              className="btn-terminal"
             >
-              {copiedModified ? <Check size={12} className="text-green-600" /> : <Copy size={12} />}
+              {copiedModified ? <Check size={12} className="text-green-500" /> : <Copy size={12} />}
               <span className="ml-1">{copiedModified ? 'Copied' : 'Copy'}</span>
             </button>
           </div>
@@ -293,14 +293,14 @@ export default function CodeDiff() {
       </div>
 
       {/* Editor Container */}
-      <div className="card overflow-hidden border border-zinc-200" style={{ height: '600px' }}>
+      <div className="card dark-editor-card overflow-hidden" style={{ height: '600px' }}>
         <DiffEditor
           height="100%"
           language={language}
           original={originalCode}
           modified={modifiedCode}
           onMount={handleEditorMount}
-          theme="vs" // Light theme for minimalist white style
+          theme="vs-dark" // Premium dark high contrast theme
           options={{
             renderSideBySide: splitView,
             minimap: { enabled: true },

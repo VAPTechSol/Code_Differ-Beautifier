@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { 
-  FileCode, 
+  GitCompare, 
   Database, 
   Sparkles, 
   Code2, 
@@ -17,7 +17,7 @@ function App() {
   const [activeTab, setActiveTab] = useState<Tab>('diff');
 
   const navigationItems = [
-    { id: 'diff' as Tab, label: 'Code Compare', icon: FileCode, description: 'Diff side-by-side or inline code changes' },
+    { id: 'diff' as Tab, label: 'Code Compare', icon: GitCompare, description: 'Diff side-by-side or inline code changes' },
     { id: 'sql-compare' as Tab, label: 'SQL Compare', icon: Database, description: 'Compare SQL queries with formatting options' },
     { id: 'beautifier' as Tab, label: 'Beautifier', icon: Sparkles, description: 'Format and beautify JS, TS, HTML, CSS, JSON & SQL' }
   ];

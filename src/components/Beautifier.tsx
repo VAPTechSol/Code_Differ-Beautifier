@@ -525,17 +525,17 @@ export default function Beautifier() {
       {/* Editor Panels */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5" style={{ height: '600px' }}>
         {/* Input Panel */}
-        <div className="card flex flex-col overflow-hidden border border-zinc-200 bg-white">
-          <div className="border-b border-zinc-100 p-3 bg-zinc-50/50 flex items-center justify-between">
+        <div className="card dark-editor-card flex flex-col overflow-hidden">
+          <div className="border-b border-zinc-900 p-3 dark-terminal-header flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="hidden sm:flex items-center gap-1.5 mr-1">
                 <span className="window-dot window-dot-red"></span>
                 <span className="window-dot window-dot-yellow"></span>
                 <span className="window-dot window-dot-green"></span>
               </div>
-              <span className="font-semibold text-xs text-zinc-500 uppercase tracking-wider">Raw Input Code</span>
+              <span className="font-semibold text-xs text-zinc-400 uppercase tracking-wider">Raw Input Code</span>
             </div>
-            <span className="text-xs text-zinc-400">Edit directly below</span>
+            <span className="text-xs text-zinc-500">Edit directly below</span>
           </div>
           <div className="flex-1 overflow-hidden">
             <Editor
@@ -543,7 +543,7 @@ export default function Beautifier() {
               language={language === 'typescript' ? 'typescript' : language === 'json' ? 'json' : language}
               value={inputCode}
               onMount={handleInputMount}
-              theme="vs"
+              theme="vs-dark"
               options={{
                 minimap: { enabled: false },
                 fontSize: 13,
@@ -559,29 +559,29 @@ export default function Beautifier() {
         </div>
 
         {/* Output Panel */}
-        <div className="card flex flex-col overflow-hidden border border-zinc-200 bg-white">
-          <div className="border-b border-zinc-100 p-3 bg-zinc-50/50 flex items-center justify-between">
+        <div className="card dark-editor-card flex flex-col overflow-hidden">
+          <div className="border-b border-zinc-900 p-3 dark-terminal-header flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="hidden sm:flex items-center gap-1.5 mr-1">
                 <span className="window-dot window-dot-red"></span>
                 <span className="window-dot window-dot-yellow"></span>
                 <span className="window-dot window-dot-green"></span>
               </div>
-              <span className="font-semibold text-xs text-zinc-500 uppercase tracking-wider">Beautified Output</span>
+              <span className="font-semibold text-xs text-zinc-400 uppercase tracking-wider">Beautified Output</span>
             </div>
             <div className="flex items-center gap-2">
               <button 
                 onClick={copyOutput} 
                 disabled={!outputCode}
-                className="btn-secondary py-1 px-2.5 text-xs disabled:opacity-50"
+                className="btn-terminal disabled:opacity-40"
               >
-                {copied ? <Check size={12} className="text-green-600" /> : <Copy size={12} />}
+                {copied ? <Check size={12} className="text-green-500" /> : <Copy size={12} />}
                 <span className="ml-1">{copied ? 'Copied' : 'Copy'}</span>
               </button>
               <button 
                 onClick={downloadCode} 
                 disabled={!outputCode}
-                className="btn-secondary py-1 px-2.5 text-xs disabled:opacity-50"
+                className="btn-terminal disabled:opacity-40"
                 title="Download formatted file"
               >
                 <Download size={12} />
@@ -594,7 +594,7 @@ export default function Beautifier() {
               height="100%"
               language={language === 'typescript' ? 'typescript' : language === 'json' ? 'json' : language}
               value={outputCode}
-              theme="vs"
+              theme="vs-dark"
               options={{
                 readOnly: true,
                 minimap: { enabled: true },
