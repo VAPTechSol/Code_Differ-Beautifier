@@ -1,83 +1,46 @@
-/* Custom layouts for components */
+/* App Layout Container styles */
 .app-container {
   display: flex;
+  flex-direction: column;
   min-height: 100vh;
   background-color: var(--bg-app);
 }
 
-.sidebar {
-  width: 260px;
-  border-right: 1px solid var(--border-color);
+.header {
+  height: 64px;
+  border-bottom: 1px solid var(--border-color);
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(16px);
-  padding: 28px 20px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  height: 100vh;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  box-shadow: 1px 0 0 0 rgba(0, 0, 0, 0.01);
-}
-
-.main-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.content-pane {
-  flex: 1;
-  padding: 32px 40px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  overflow-y: auto;
-}
-
-.header {
-  height: 72px;
-  border-bottom: 1px solid var(--border-color);
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(12px);
-  padding: 0 40px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   position: sticky;
   top: 0;
-  z-index: 5;
+  z-index: 40;
+}
+
+.content-pane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
 }
 
 /* Nav Link Transitions */
 nav button {
   position: relative;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid transparent;
 }
 
 nav button:hover:not(.active) {
-  background-color: rgba(9, 9, 11, 0.03);
+  background-color: rgba(9, 9, 11, 0.04);
+  color: var(--text-primary);
 }
 
 nav button.active {
-  background-color: var(--accent-color);
-  color: #ffffff;
-  box-shadow: 0 2px 8px rgba(9, 9, 11, 0.12);
-}
-
-/* Inset border highlight for cards */
-.premium-glow {
-  position: relative;
-}
-
-.premium-glow::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 12px;
-  pointer-events: none;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  mix-blend-mode: overlay;
+  background-color: #ffffff;
+  color: var(--text-primary);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 2px 8px rgba(0, 0, 0, 0.02);
+  border-color: rgba(228, 228, 231, 0.8) !important;
 }

@@ -4,8 +4,6 @@ import {
   Database, 
   Sparkles, 
   Code2, 
-  Menu, 
-  X,
   ExternalLink
 } from 'lucide-react';
 import CodeDiff from './components/CodeDiff';
@@ -17,7 +15,6 @@ type Tab = 'diff' | 'sql-compare' | 'beautifier';
 
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>('diff');
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navigationItems = [
     { id: 'diff' as Tab, label: 'Code Compare', icon: FileCode, description: 'Diff side-by-side or inline code changes' },
@@ -25,146 +22,84 @@ function App() {
     { id: 'beautifier' as Tab, label: 'Beautifier', icon: Sparkles, description: 'Format and beautify JS, TS, HTML, CSS, JSON & SQL' }
   ];
 
-  const activeItem = navigationItems.find(item => item.id === activeTab);
-
   return (
-    <div className="app-container font-sans flex flex-col md:flex-row min-h-screen text-zinc-900 bg-zinc-50">
+    <div className="app-container font-sans flex flex-col min-h-screen text-zinc-900 bg-zinc-50">
       
-      {/* Mobile Top Navigation Header */}
-      <header className="md:hidden flex items-center justify-between px-6 py-4 bg-white border-b border-zinc-200 sticky top-0 z-40">
-        <div className="flex items-center gap-2">
-          <div className="p-1.5 bg-black rounded-lg text-white">
+      {/* Top Premium Navbar */}
+      <header className="header sticky top-0 z-40 bg-white border-b border-zinc-200/80 px-6 md:px-10 flex items-center justify-between">
+        
+        {/* Brand Logo */}
+        <div className="flex items-center gap-2.5 shrink-0">
+          <div className="p-1.5 bg-black rounded-lg text-white shadow-sm flex items-center justify-center">
             <Code2 size={18} />
           </div>
-          <span className="font-bold text-lg tracking-tight">Klarity</span>
-        </div>
-        <button 
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="p-1 hover:bg-zinc-100 rounded-md transition-colors"
-          aria-label="Toggle Navigation Menu"
-        >
-          {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
-      </header>
-
-      {/* Mobile Menu Dropdown */}
-      {mobileMenuOpen && (
-        <div className="md:hidden fixed inset-x-0 top-[61px] bg-white border-b border-zinc-200 z-30 shadow-lg animate-fade-in">
-          <nav className="p-4 flex flex-col gap-2">
-            {navigationItems.map((item) => {
-              const Icon = item.icon;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => {
-                    setActiveTab(item.id);
-                    setMobileMenuOpen(false);
-                  }}
-                  className={`flex items-center gap-3.5 p-3 rounded-lg text-left transition-all ${
-                    activeTab === item.id
-                      ? 'active text-white font-medium shadow-sm'
-                      : 'text-zinc-600 hover:bg-zinc-100'
-                  }`}
-                >
-                  <Icon size={18} />
-                  <div>
-                    <div className="font-semibold text-xs leading-none">{item.label}</div>
-                  </div>
-                </button>
-              );
-            })}
-            <div className="border-t border-zinc-100 my-2 pt-2 text-center text-[10px] text-zinc-400">
-              © {new Date().getFullYear()} Klarity Devtools
-            </div>
-          </nav>
-        </div>
-      )}
-
-      {/* Desktop Sidebar */}
-      <aside className="hidden md:flex sidebar border-r border-zinc-200 sticky top-0 h-screen z-10 shrink-0">
-        <div className="flex flex-col gap-8">
-          {/* Logo / Header */}
-          <div className="flex items-center gap-2.5 px-2">
-            <div className="p-1.5 bg-black rounded-lg text-white shadow-sm">
-              <Code2 size={20} />
-            </div>
-            <div>
-              <span className="font-bold text-lg tracking-tight text-zinc-950">Klarity</span>
-              <span className="block text-[10px] text-zinc-400 font-bold tracking-wider uppercase mt-0.5">Premium Dev Suite</span>
-            </div>
-          </div>
-
-          {/* Navigation Links */}
-          <nav className="flex flex-col gap-1.5">
-            {navigationItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = activeTab === item.id;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => setActiveTab(item.id)}
-                  className={`flex items-center gap-3.5 px-4 py-3 rounded-lg text-left transition-all ${
-                    isActive
-                      ? 'active text-white font-semibold'
-                      : 'text-zinc-600 hover:text-zinc-950'
-                  }`}
-                >
-                  <Icon size={18} className={isActive ? 'text-white' : 'text-zinc-400'} />
-                  <div>
-                    <span className="block text-xs font-semibold leading-none">{item.label}</span>
-                  </div>
-                </button>
-              );
-            })}
-          </nav>
-        </div>
-
-        {/* Footer Brand Info */}
-        <div className="flex flex-col gap-4 border-t border-zinc-100 pt-6 px-2">
-          <div className="flex items-center justify-between text-[11px] text-zinc-400">
-            <span>Version 1.1.0</span>
-            <a 
-              href="https://github.com" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="hover:text-zinc-900 flex items-center gap-0.5"
-            >
-              Docs <ExternalLink size={10} />
-            </a>
-          </div>
-          <p className="text-[10px] text-zinc-400 font-medium leading-relaxed">
-            Beautiful utilities for developer productivity. Zero-dependency formatters.
-          </p>
-        </div>
-      </aside>
-
-      {/* Main Workspace Area */}
-      <main className="main-content flex-1 flex flex-col min-w-0">
-        
-        {/* Workspace Page Header */}
-        <div className="hidden md:flex header h-16 border-b border-zinc-200 bg-white px-8 items-center justify-between shrink-0">
           <div>
-            <h1 className="text-base font-bold text-zinc-900 leading-none">
-              {activeItem?.label}
-            </h1>
-            <span className="text-[11px] text-zinc-400 font-medium block mt-1">
-              {activeItem?.description}
-            </span>
+            <span className="font-bold text-base tracking-tight text-zinc-950 block leading-none">Klarity</span>
+            <span className="text-[9px] text-zinc-400 font-bold tracking-wider uppercase mt-1 block">Premium Dev Suite</span>
           </div>
-          
-          <div className="flex items-center gap-3 text-xs font-semibold tracking-wider text-zinc-400 uppercase bg-zinc-50 px-3 py-1.5 rounded-full border border-zinc-100">
+        </div>
+
+        {/* Navigation Pills */}
+        <nav className="flex items-center bg-zinc-100 p-1 rounded-xl border border-zinc-200/50">
+          {navigationItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeTab === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => setActiveTab(item.id)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-left transition-all ${
+                  isActive
+                    ? 'active bg-white text-zinc-950 font-semibold shadow-sm border border-zinc-200/40'
+                    : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50/50'
+                }`}
+              >
+                <Icon size={14} className={isActive ? 'text-black' : 'text-zinc-400'} />
+                <span className="text-xs font-semibold leading-none">{item.label}</span>
+              </button>
+            );
+          })}
+        </nav>
+
+        {/* Status Indicator & Links */}
+        <div className="flex items-center gap-6 shrink-0">
+          <div className="hidden md:flex items-center gap-2 text-xs font-semibold tracking-wider text-zinc-400 uppercase bg-zinc-50 px-3 py-1.5 rounded-full border border-zinc-100">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
             <span>Status: Ready</span>
           </div>
+          
+          <a 
+            href="https://github.com" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-xs text-zinc-400 hover:text-zinc-900 font-medium flex items-center gap-1 transition-colors"
+          >
+            <span>Docs</span>
+            <ExternalLink size={11} />
+          </a>
         </div>
+      </header>
 
-        {/* Workspace Display Area */}
-        <div className="content-pane flex-grow overflow-y-auto px-4 py-6 md:p-8">
+      {/* Main Workspace Display Area */}
+      <main className="content-pane flex-grow overflow-y-auto px-6 py-6 md:px-10 md:py-8">
+        <div className="max-w-[1600px] mx-auto w-full flex flex-col gap-6">
           {activeTab === 'diff' && <CodeDiff />}
           {activeTab === 'sql-compare' && <SqlCompare />}
           {activeTab === 'beautifier' && <Beautifier />}
         </div>
       </main>
+
+      {/* Modern Compact Footer */}
+      <footer className="bg-white border-t border-zinc-200/80 py-4 px-6 md:px-10 flex flex-col sm:flex-row items-center justify-between text-[11px] text-zinc-400">
+        <div>
+          © {new Date().getFullYear()} Klarity Devtools. All rights reserved.
+        </div>
+        <div className="flex items-center gap-4 mt-2 sm:mt-0 font-medium">
+          <span>Version 1.1.0</span>
+          <span className="text-zinc-300">|</span>
+          <span className="text-zinc-400">Premium minimalist utility engine. Built for performance.</span>
+        </div>
+      </footer>
     </div>
   );
 }
