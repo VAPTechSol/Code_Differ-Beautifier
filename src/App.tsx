@@ -3,20 +3,20 @@ import {
   GitCompare, 
   Database, 
   Sparkles, 
-  Coffee
+  Coffee,
+  Smile
 } from 'lucide-react';
 import CodeDiff from './components/CodeDiff';
 import SqlCompare from './components/SqlCompare';
 import Beautifier from './components/Beautifier';
-import CoffeeModal from './components/CoffeeModal';
+import DestressZone from './components/DestressZone';
 import './App.css';
 import { VERSION } from './version';
 
-type Tab = 'diff' | 'sql-compare' | 'beautifier';
+type Tab = 'diff' | 'sql-compare' | 'beautifier' | 'destress';
 
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>('diff');
-  const [isCoffeeOpen, setIsCoffeeOpen] = useState(false);
 
   const funStates = [
     "Ready to Rumble",
@@ -44,7 +44,8 @@ function App() {
   const navigationItems = [
     { id: 'diff' as Tab, label: 'Code Compare', icon: GitCompare, description: 'Diff side-by-side or inline code changes' },
     { id: 'sql-compare' as Tab, label: 'SQL Compare', icon: Database, description: 'Compare SQL queries with formatting options' },
-    { id: 'beautifier' as Tab, label: 'Beautifier', icon: Sparkles, description: 'Format and beautify JS, TS, HTML, CSS, JSON & SQL' }
+    { id: 'beautifier' as Tab, label: 'Beautifier', icon: Sparkles, description: 'Format and beautify JS, TS, HTML, CSS, JSON & SQL' },
+    { id: 'destress' as Tab, label: 'Destress Zone 🎈', icon: Smile, description: 'Play stress-relieving mini-games and support the team' }
   ];
 
   return (
@@ -86,7 +87,7 @@ function App() {
           </div>
           <div>
             <span className="font-extrabold text-base tracking-tight text-zinc-950 block leading-none transition-colors duration-300 group-hover:text-[#ff6b00]">
-              Kollate
+              Kollidr
             </span>
             <span className="text-[9px] text-zinc-400 font-bold tracking-widest uppercase mt-1.5 block">
               Premium Dev Suite
@@ -128,10 +129,10 @@ function App() {
           </div>
           
           <button 
-            onClick={() => setIsCoffeeOpen(true)}
-            className="text-xs text-zinc-600 hover:text-zinc-950 font-bold font-mono border-2 border-dashed border-zinc-300 hover:border-black px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all btn-spring"
+            onClick={() => setActiveTab('destress')}
+            className={`text-xs font-bold font-mono border-2 border-dashed px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all btn-spring ${activeTab === 'destress' ? 'border-[#ff6b00] bg-[#ff6b00] text-white shadow-[2px_2px_0px_0px_#000000]' : 'border-zinc-300 hover:border-black text-zinc-600 hover:text-zinc-950'}`}
           >
-            <Coffee size={13} className="text-[#ff6b00]" />
+            <Coffee size={13} className={activeTab === 'destress' ? 'text-white' : 'text-[#ff6b00]'} />
             <span>Coffee & Destress</span>
           </button>
         </div>
@@ -143,13 +144,14 @@ function App() {
           {activeTab === 'diff' && <CodeDiff />}
           {activeTab === 'sql-compare' && <SqlCompare />}
           {activeTab === 'beautifier' && <Beautifier />}
+          {activeTab === 'destress' && <DestressZone />}
         </div>
       </main>
 
       {/* Modern Compact Footer */}
       <footer className="relative z-10 bg-white/90 border-t-2 border-zinc-200/80 py-3.5 px-6 md:px-10 flex flex-col sm:flex-row items-center justify-between text-[11px] text-zinc-400 shrink-0 backdrop-blur-md">
         <div>
-          © {new Date().getFullYear()} Kollate Studio. All rights reserved.
+          © {new Date().getFullYear()} Kollidr Studio. All rights reserved.
         </div>
         <div className="flex items-center gap-4 mt-2 sm:mt-0 font-medium">
           <span>Version {VERSION}</span>
@@ -157,9 +159,6 @@ function App() {
           <span>Made with ❤️ by <a href="mailto:info@vaptechsol.com" className="underline hover:text-zinc-800 transition-colors">VAPTechSol</a></span>
         </div>
       </footer>
-
-      {/* Coffee & Destress Station Drawer */}
-      <CoffeeModal isOpen={isCoffeeOpen} onClose={() => setIsCoffeeOpen(false)} onOpen={() => setIsCoffeeOpen(true)} />
     </div>
   );
 }
