@@ -378,6 +378,8 @@ export default function SqlCompare() {
           onMount={handleEditorMount}
           theme="vs"
           options={{
+            originalEditable: true,
+            readOnly: false,
             renderSideBySide: true,
             minimap: { enabled: true },
             scrollBeyondLastLine: false,

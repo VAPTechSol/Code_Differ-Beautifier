@@ -302,6 +302,8 @@ export default function CodeDiff() {
           onMount={handleEditorMount}
           theme="vs"
           options={{
+            originalEditable: true,
+            readOnly: false,
             renderSideBySide: splitView,
             minimap: { enabled: true },
             scrollBeyondLastLine: false,
