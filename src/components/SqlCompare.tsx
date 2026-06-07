@@ -145,19 +145,20 @@ export default function SqlCompare() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const isIdentical = displayOriginal.trim() === displayModified.trim();
+
   return (
     <div className="animate-fade-in flex flex-col gap-4 flex-1 min-h-0">
       {/* SQL Compare Settings Toolbar */}
-      <div className="card bg-white flex flex-col overflow-hidden border border-zinc-200 shrink-0">
-        <div className="p-4 flex flex-wrap items-center justify-between gap-4 border-b border-zinc-100">
+      <div className="card bg-white flex flex-col overflow-hidden border-2 border-zinc-200 shrink-0">
+        <div className="p-4 flex flex-wrap items-center justify-between gap-4 border-b-2 border-zinc-200">
           <div className="flex flex-wrap items-center gap-6">
             <div className="flex flex-col gap-1">
-              <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">SQL Dialect</span>
+              <span className="text-xs font-mono font-bold text-zinc-400 uppercase tracking-wider">SQL Dialect</span>
               <select 
                 value={dialect} 
                 onChange={(e) => setDialect(e.target.value as any)}
-                className="btn-secondary py-1.5 px-3 pr-8"
-                style={{ appearance: 'auto' }}
+                className="py-1 px-3 pr-8"
               >
                 {SQL_DIALECTS.map(d => (
                   <option key={d.value} value={d.value}>{d.label}</option>
@@ -166,77 +167,95 @@ export default function SqlCompare() {
             </div>
 
             {/* Core Rules Checkboxes */}
-            <div className="flex items-center gap-4 pt-2 md:pt-0">
-              <label className="flex items-center gap-2 text-sm font-medium text-zinc-700 cursor-pointer">
+            <div className="flex items-center gap-5 pt-2 md:pt-0">
+              <label className="flex items-center gap-2.5 text-xs font-mono font-bold text-zinc-700 cursor-pointer select-none">
                 <input 
                   type="checkbox" 
                   checked={stripComments}
                   onChange={(e) => setStripComments(e.target.checked)}
-                  className="rounded border-zinc-300 text-black focus:ring-black h-4 w-4"
+                  className="rounded-md border-2 border-zinc-300 text-[#ff6b00] focus:ring-[#ff6b00] h-4.5 w-4.5 accent-[#ff6b00] cursor-pointer"
                 />
                 <span className="flex items-center gap-1">
-                  <EyeOff size={14} className="text-zinc-400" />
+                  <EyeOff size={13} className="text-zinc-400" />
                   Strip Comments
                 </span>
               </label>
 
-              <label className="flex items-center gap-2 text-sm font-medium text-zinc-700 cursor-pointer">
+              <label className="flex items-center gap-2.5 text-xs font-mono font-bold text-zinc-700 cursor-pointer select-none">
                 <input 
                   type="checkbox" 
                   checked={ignoreWhitespace}
                   onChange={(e) => setIgnoreWhitespace(e.target.checked)}
-                  className="rounded border-zinc-300 text-black focus:ring-black h-4 w-4"
+                  className="rounded-md border-2 border-zinc-300 text-[#ff6b00] focus:ring-[#ff6b00] h-4.5 w-4.5 accent-[#ff6b00] cursor-pointer"
                 />
                 <span>Ignore Whitespace</span>
               </label>
             </div>
 
             {/* Advanced Toggle */}
-            <button 
-              onClick={() => setShowAdvanced(!showAdvanced)}
-              className={`btn-secondary py-1.5 px-3 flex items-center gap-2 ${showAdvanced ? 'bg-zinc-100 border-zinc-400 text-black' : ''}`}
-            >
-              <Sliders size={14} />
-              <span>Advanced Styling {showAdvanced ? '▲' : '▼'}</span>
-            </button>
+            <div className="flex flex-col gap-1">
+              <span className="text-xs font-mono font-bold text-zinc-400 uppercase tracking-wider">Preferences</span>
+              <button 
+                onClick={() => setShowAdvanced(!showAdvanced)}
+                className={`btn-secondary py-1.5 px-3 flex items-center gap-2 btn-spring ${showAdvanced ? 'border-zinc-950 bg-zinc-950 text-white font-bold shadow-[2px_2px_0px_0px_#000000] hover:text-white' : ''}`}
+              >
+                <Sliders size={13} />
+                <span>Formatter Settings {showAdvanced ? '▲' : '▼'}</span>
+              </button>
+            </div>
+
+            {/* Match Status Badge */}
+            <div className="flex flex-col gap-1">
+              <span className="text-xs font-mono font-bold text-zinc-400 uppercase tracking-wider">Match Status</span>
+              <div className="flex items-center min-h-[30px]">
+                {isIdentical ? (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 text-green-700 text-[11px] font-bold border-2 border-green-300 rounded-lg animate-success-pop font-mono">
+                    <span>Perfect Match! No drama here. 🤝</span>
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-orange-50 text-[#ff6b00] text-[11px] font-bold border-2 border-[#ff6b00]/30 rounded-lg font-mono">
+                    <span>Divergence detected! Code has drifted. 🚨</span>
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             <button 
               onClick={formatInputsInPlace} 
-              className="btn-primary py-1.5"
+              className="btn-primary py-1.5 px-4 btn-spring text-xs"
               title="Auto-format and clean original inputs"
             >
-              <Sparkles size={14} />
+              <Sparkles size={13} />
               <span>Format & Align</span>
             </button>
             
-            <button onClick={handleSwap} className="btn-secondary py-1.5" title="Swap Panels">
-              <ArrowLeftRight size={14} />
+            <button onClick={handleSwap} className="btn-secondary py-1.5 px-3 btn-spring" title="Swap Panels">
+              <ArrowLeftRight size={13} />
               <span>Swap</span>
             </button>
             
-            <button onClick={handleClear} className="btn-secondary py-1.5 text-red-600 hover:text-red-700" title="Clear All">
-              <Trash2 size={14} />
+            <button onClick={handleClear} className="btn-secondary py-1.5 px-3 btn-spring text-red-600 hover:text-red-700 hover:border-red-300 hover:bg-red-50/20" title="Clear All">
+              <Trash2 size={13} />
               <span>Clear</span>
             </button>
           </div>
         </div>
 
-        {/* Collapsible Advanced Redgate-style Settings Panel */}
+        {/* Collapsible Advanced Settings Panel */}
         {showAdvanced && (
-          <div className="p-5 bg-zinc-50 border-t border-zinc-100 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-fade-in text-sm">
+          <div className="p-5 bg-zinc-50 border-t-2 border-zinc-200 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-fade-in text-sm dot-pattern">
             {/* Casing Rules */}
-            <div className="flex flex-col gap-2">
-              <span className="font-semibold text-xs text-zinc-500 uppercase tracking-wider">Casing Rules</span>
+            <div className="card p-4 bg-white flex flex-col gap-3">
+              <span className="font-extrabold text-[10px] text-zinc-400 font-mono uppercase tracking-widest border-b border-zinc-100 pb-1.5">Casing Rules</span>
               
               <div className="flex items-center justify-between gap-4">
-                <label className="text-zinc-600 text-xs">Keywords:</label>
+                <label className="text-zinc-600 text-xs font-mono font-bold">Keywords:</label>
                 <select 
                   value={keywordCase} 
                   onChange={(e) => setKeywordCase(e.target.value as any)}
-                  className="btn-secondary py-1 px-2 text-xs bg-white"
-                  style={{ appearance: 'auto' }}
+                  className="py-0.5 px-2 text-xs"
                 >
                   <option value="upper">UPPERCASE</option>
                   <option value="lower">lowercase</option>
@@ -245,12 +264,11 @@ export default function SqlCompare() {
               </div>
 
               <div className="flex items-center justify-between gap-4">
-                <label className="text-zinc-600 text-xs">Functions:</label>
+                <label className="text-zinc-600 text-xs font-mono font-bold">Functions:</label>
                 <select 
                   value={functionCase} 
                   onChange={(e) => setFunctionCase(e.target.value as any)}
-                  className="btn-secondary py-1 px-2 text-xs bg-white"
-                  style={{ appearance: 'auto' }}
+                  className="py-0.5 px-2 text-xs"
                 >
                   <option value="upper">UPPERCASE</option>
                   <option value="lower">lowercase</option>
@@ -259,12 +277,11 @@ export default function SqlCompare() {
               </div>
 
               <div className="flex items-center justify-between gap-4">
-                <label className="text-zinc-600 text-xs">Data Types:</label>
+                <label className="text-zinc-600 text-xs font-mono font-bold">Data Types:</label>
                 <select 
                   value={dataTypeCase} 
                   onChange={(e) => setDataTypeCase(e.target.value as any)}
-                  className="btn-secondary py-1 px-2 text-xs bg-white"
-                  style={{ appearance: 'auto' }}
+                  className="py-0.5 px-2 text-xs"
                 >
                   <option value="upper">UPPERCASE</option>
                   <option value="lower">lowercase</option>
@@ -274,29 +291,28 @@ export default function SqlCompare() {
             </div>
 
             {/* Layout Rules */}
-            <div className="flex flex-col gap-2">
-              <span className="font-semibold text-xs text-zinc-500 uppercase tracking-wider">Logical Operators</span>
-              <div className="flex items-center justify-between gap-4">
-                <label className="text-zinc-600 text-xs">Line Break:</label>
+            <div className="card p-4 bg-white flex flex-col gap-3">
+              <span className="font-extrabold text-[10px] text-zinc-400 font-mono uppercase tracking-widest border-b border-zinc-100 pb-1.5">Logical Operators</span>
+              <div className="flex flex-col gap-2">
+                <label className="text-zinc-600 text-xs font-mono font-bold">Line Break Position:</label>
                 <select 
                   value={logicalOperatorNewline} 
                   onChange={(e) => setLogicalOperatorNewline(e.target.value as any)}
-                  className="btn-secondary py-1 px-2 text-xs bg-white"
-                  style={{ appearance: 'auto' }}
+                  className="py-1 px-2 text-xs w-full"
                 >
-                  <option value="before">Before Operator (AND/OR at start)</option>
-                  <option value="after">After Operator (AND/OR at end)</option>
+                  <option value="before">Before Operator (AND/OR start)</option>
+                  <option value="after">After Operator (AND/OR end)</option>
                 </select>
               </div>
             </div>
 
             {/* List Formatting */}
-            <div className="flex flex-col gap-2">
-              <span className="font-semibold text-xs text-zinc-500 uppercase tracking-wider">Expression Spacing</span>
-              <div className="flex flex-col gap-1.5">
+            <div className="card p-4 bg-white flex flex-col gap-3">
+              <span className="font-extrabold text-[10px] text-zinc-400 font-mono uppercase tracking-widest border-b border-zinc-100 pb-1.5">Expression Spacing</span>
+              <div className="flex flex-col gap-2">
                 <div className="flex items-center justify-between gap-4">
-                  <label className="text-zinc-600 text-xs">Wrap Threshold:</label>
-                  <span className="text-xs font-semibold text-zinc-800">{expressionWidth} chars</span>
+                  <label className="text-zinc-600 text-xs font-mono font-bold">Wrap Threshold:</label>
+                  <span className="text-xs font-mono font-extrabold text-[#ff6b00]">{expressionWidth} chars</span>
                 </div>
                 <input 
                   type="range" 
@@ -305,20 +321,20 @@ export default function SqlCompare() {
                   step="5"
                   value={expressionWidth} 
                   onChange={(e) => setExpressionWidth(parseInt(e.target.value))}
-                  className="w-full accent-black h-1.5 bg-zinc-200 rounded-lg appearance-none cursor-pointer"
+                  className="w-full accent-[#ff6b00] h-2 bg-zinc-200 rounded-lg appearance-none cursor-pointer border border-zinc-300"
                 />
-                <span className="text-[10px] text-zinc-400">Controls line wrapping within parenthesis lists.</span>
+                <span className="text-[10px] text-zinc-400 font-mono">Controls parentheses list breaking.</span>
               </div>
             </div>
 
             {/* Redgate Presets Info */}
-            <div className="flex flex-col gap-1.5 bg-zinc-100/80 p-3 rounded-md border border-zinc-200">
-              <span className="font-bold text-xs text-zinc-700 flex items-center gap-1">
-                <Sparkles size={12} className="text-zinc-500" />
+            <div className="card p-4 bg-zinc-50 flex flex-col gap-2 border-dashed">
+              <span className="font-extrabold text-[10px] text-zinc-700 font-mono uppercase tracking-widest flex items-center gap-1">
+                <Sparkles size={12} className="text-[#ff6b00]" />
                 Redgate Prompt Style
               </span>
-              <p className="text-[11px] text-zinc-500 leading-normal">
-                Aligns column definitions, normalizes operators, and implements case capitalization parameters across SQL dialects automatically.
+              <p className="text-[11px] text-zinc-500 leading-normal font-mono">
+                Aligns columns, normalizes JOIN conditions, and applies case regulations to standard dialect systems.
               </p>
             </div>
           </div>
@@ -326,50 +342,50 @@ export default function SqlCompare() {
       </div>
 
       {/* SQL Headers */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 shrink-0">
         {/* Original SQL Card */}
-        <div className="card p-3 flex items-center justify-between dark-terminal-header">
+        <div className="card p-2 px-4 flex items-center justify-between dark-terminal-header border-b-0 rounded-b-none">
           <div className="flex items-center gap-3">
             <div className="hidden sm:flex items-center gap-1.5 mr-1">
               <span className="window-dot window-dot-red"></span>
               <span className="window-dot window-dot-yellow"></span>
               <span className="window-dot window-dot-green"></span>
             </div>
-            <Database size={16} className="text-zinc-400" />
-            <span className="font-semibold text-sm">Original SQL Query</span>
+            <Database size={15} className="text-[#ff6b00]" />
+            <span className="font-bold text-xs uppercase tracking-wider font-mono">Original SQL Query</span>
           </div>
           <button 
             onClick={() => copyToClipboard(displayOriginal, setCopiedOriginal)} 
-            className="btn-terminal"
+            className="btn-terminal btn-spring"
           >
-            {copiedOriginal ? <Check size={12} className="text-green-500" /> : <Copy size={12} />}
+            {copiedOriginal ? <Check size={12} className="text-green-600" /> : <Copy size={12} />}
             <span className="ml-1">{copiedOriginal ? 'Copied' : 'Copy'}</span>
           </button>
         </div>
 
         {/* Modified SQL Card */}
-        <div className="card p-3 flex items-center justify-between dark-terminal-header">
+        <div className="card p-2 px-4 flex items-center justify-between dark-terminal-header border-b-0 rounded-b-none">
           <div className="flex items-center gap-3">
             <div className="hidden sm:flex items-center gap-1.5 mr-1">
               <span className="window-dot window-dot-red"></span>
               <span className="window-dot window-dot-yellow"></span>
               <span className="window-dot window-dot-green"></span>
             </div>
-            <Database size={16} className="text-zinc-400" />
-            <span className="font-semibold text-sm">Modified SQL Query</span>
+            <Database size={15} className="text-[#ff6b00]" />
+            <span className="font-bold text-xs uppercase tracking-wider font-mono">Modified SQL Query</span>
           </div>
           <button 
             onClick={() => copyToClipboard(displayModified, setCopiedModified)} 
-            className="btn-terminal"
+            className="btn-terminal btn-spring"
           >
-            {copiedModified ? <Check size={12} className="text-green-500" /> : <Copy size={12} />}
+            {copiedModified ? <Check size={12} className="text-green-600" /> : <Copy size={12} />}
             <span className="ml-1">{copiedModified ? 'Copied' : 'Copy'}</span>
           </button>
         </div>
       </div>
 
       {/* Editor Container */}
-      <div className="card dark-editor-card overflow-hidden flex-1 min-h-0">
+      <div className="card dark-editor-card overflow-hidden flex-1 min-h-0 border-t-0 rounded-t-none">
         <DiffEditor
           height="100%"
           language="sql"
@@ -383,8 +399,9 @@ export default function SqlCompare() {
             renderSideBySide: true,
             minimap: { enabled: true },
             scrollBeyondLastLine: false,
-            fontSize: 13,
-            lineHeight: 20,
+            fontSize: 12,
+            lineHeight: 18,
+            fontFamily: "'JetBrains Mono', monospace",
             automaticLayout: true,
             ignoreTrimWhitespace: ignoreWhitespace,
             scrollbar: {

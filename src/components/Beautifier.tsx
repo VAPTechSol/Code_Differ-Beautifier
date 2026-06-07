@@ -92,6 +92,15 @@ export default function Beautifier() {
   const [isFormatting, setIsFormatting] = useState(false);
   const [formatSuccess, setFormatSuccess] = useState(false);
 
+  const successPhrases = [
+    "Ta-da! Your code is now gorgeous! ✨",
+    "Beautified! Clean enough to show your grandmother. 👵",
+    "Aligned! Perfectly balanced, as all things should be. ⚖️",
+    "Voila! The compiler is crying tears of joy. 😭",
+    "Done! Clean code is happy code. 💻"
+  ];
+  const [successMsg, setSuccessMsg] = useState(successPhrases[0]);
+
   const inputEditorRef = useRef<any>(null);
 
   // Update input code default template when language changes
@@ -110,6 +119,24 @@ export default function Beautifier() {
     editor.onDidChangeModelContent(() => {
       setInputCode(editor.getValue());
     });
+  };
+
+  const loadPreset = (presetType: 'js' | 'sql' | 'html') => {
+    let sample = '';
+    if (presetType === 'js') {
+      setLanguage('javascript');
+      sample = `function  foo( a,b ){const x=a+b;if(x>10){console.log("very big number: ",x);return  x;}else{return false;}}foo(2, 3);`;
+    } else if (presetType === 'sql') {
+      setLanguage('sql');
+      sample = `select a.id,b.name,   c.address  from   tableA a join  tableB b   on a.id=b.a_id  where a.status = 'active'   and b.age > 21;`;
+    } else if (presetType === 'html') {
+      setLanguage('html');
+      sample = `<div class="main"><h1  id="title">   Hello World  </h1><p class="desc">some scrambled  text  </p></div>`;
+    }
+    setInputCode(sample);
+    if (inputEditorRef.current) {
+      inputEditorRef.current.setValue(sample);
+    }
   };
 
   const performFormatting = () => {
@@ -232,8 +259,12 @@ export default function Beautifier() {
         }
 
         setOutputCode(result);
+        
+        // Pick a random funny success phrase
+        const phrase = successPhrases[Math.floor(Math.random() * successPhrases.length)];
+        setSuccessMsg(phrase);
         setFormatSuccess(true);
-        setTimeout(() => setFormatSuccess(false), 1500);
+        setTimeout(() => setFormatSuccess(false), 2200);
       } catch (error) {
         console.error('Formatting Error:', error);
         setOutputCode(`/* Error during formatting: \n${(error as Error).message} \n*/\n\n${inputCode}`);
@@ -314,18 +345,18 @@ export default function Beautifier() {
   };
 
   return (
-    <div className="animate-fade-in flex flex-col gap-4 flex-1 min-h-0">
+    <div className="animate-fade-in flex flex-col gap-4 flex-1 min-h-0 relative">
+      
       {/* Settings bar */}
-      <div className="card bg-white flex flex-col overflow-hidden border border-zinc-200 shrink-0">
-        <div className="p-4 flex flex-wrap items-center justify-between gap-4 border-b border-zinc-100">
+      <div className="card bg-white flex flex-col overflow-hidden border-2 border-zinc-200 shrink-0">
+        <div className="p-4 flex flex-wrap items-center justify-between gap-4 border-b-2 border-zinc-200">
           <div className="flex flex-wrap items-center gap-6">
             <div className="flex flex-col gap-1">
-              <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Language</span>
+              <span className="text-xs font-mono font-bold text-zinc-400 uppercase tracking-wider">Language</span>
               <select 
                 value={language} 
                 onChange={handleLanguageChange}
-                className="btn-secondary py-1.5 px-3 pr-8"
-                style={{ appearance: 'auto' }}
+                className="py-1 px-3 pr-8"
               >
                 {LANGUAGES.map(lang => (
                   <option key={lang.value} value={lang.value}>{lang.label}</option>
@@ -334,7 +365,7 @@ export default function Beautifier() {
             </div>
 
             <div className="flex flex-col gap-1">
-              <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Tab Spacing</span>
+              <span className="text-xs font-mono font-bold text-zinc-400 uppercase tracking-wider">Tab Spacing</span>
               <div className="flex items-center gap-2">
                 <select 
                   value={indentWithTabs ? 'tabs' : indentSize.toString()}
@@ -346,8 +377,7 @@ export default function Beautifier() {
                       setIndentSize(parseInt(e.target.value));
                     }
                   }}
-                  className="btn-secondary py-1.5 px-3 pr-8"
-                  style={{ appearance: 'auto' }}
+                  className="py-1 px-3 pr-8"
                 >
                   <option value="2">2 Spaces</option>
                   <option value="4">4 Spaces</option>
@@ -358,12 +388,11 @@ export default function Beautifier() {
             </div>
 
             <div className="flex flex-col gap-1">
-              <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Line Wrap</span>
+              <span className="text-xs font-mono font-bold text-zinc-400 uppercase tracking-wider">Line Wrap</span>
               <select 
                 value={wrapLineLength.toString()} 
                 onChange={(e) => setWrapLineLength(parseInt(e.target.value))}
-                className="btn-secondary py-1.5 px-3 pr-8"
-                style={{ appearance: 'auto' }}
+                className="py-1 px-3 pr-8"
               >
                 <option value="80">80 chars</option>
                 <option value="100">100 chars</option>
@@ -373,67 +402,73 @@ export default function Beautifier() {
             </div>
 
             {language === 'sql' && (
-              <button 
-                onClick={() => setShowSqlSettings(!showSqlSettings)}
-                className={`btn-secondary mt-4 md:mt-0 py-1.5 px-3 flex items-center gap-2 ${showSqlSettings ? 'bg-zinc-100 border-zinc-400 text-black' : ''}`}
-              >
-                <Sliders size={14} />
-                <span>Advanced SQL {showSqlSettings ? '▲' : '▼'}</span>
-              </button>
+              <div className="flex flex-col gap-1">
+                <span className="text-xs font-mono font-bold text-zinc-400 uppercase tracking-wider">SQL Parameters</span>
+                <button 
+                  onClick={() => setShowSqlSettings(!showSqlSettings)}
+                  className={`btn-secondary py-1.5 px-3 flex items-center gap-2 btn-spring ${showSqlSettings ? 'border-zinc-950 bg-zinc-950 text-white font-bold shadow-[2px_2px_0px_0px_#000000] hover:text-white' : ''}`}
+                >
+                  <Sliders size={13} />
+                  <span>Advanced SQL Settings {showSqlSettings ? '▲' : '▼'}</span>
+                </button>
+              </div>
             )}
 
             <div className="flex items-center gap-2 pt-4 md:pt-0">
-              <label className="flex items-center gap-2 text-sm font-medium text-zinc-700 cursor-pointer">
+              <label className="flex items-center gap-2.5 text-xs font-mono font-bold text-zinc-700 cursor-pointer select-none">
                 <input 
                   type="checkbox" 
                   checked={autoFormat}
                   onChange={(e) => setAutoFormat(e.target.checked)}
-                  className="rounded border-zinc-300 text-black focus:ring-black h-4 w-4"
+                  className="rounded-md border-2 border-zinc-300 text-[#ff6b00] focus:ring-[#ff6b00] h-4.5 w-4.5 accent-[#ff6b00] cursor-pointer"
                 />
                 <span>Auto Format on Change</span>
               </label>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             <button 
               onClick={performFormatting} 
-              className={`btn-primary py-1.5 px-4 font-semibold ${formatSuccess ? 'bg-green-600 border-green-600 hover:bg-green-700' : ''}`}
+              className={`btn-primary py-1.5 px-4 btn-spring text-xs ${formatSuccess ? 'bg-[#ff6b00] border-black hover:bg-[#ff8533] text-white shadow-[2px_2px_0px_0px_#000000]' : ''}`}
               disabled={isFormatting}
             >
               {formatSuccess ? (
                 <>
-                  <Check size={14} />
-                  <span>Formatted!</span>
+                  <Check size={13} />
+                  <span>Beautified!</span>
                 </>
               ) : (
                 <>
-                  <Sparkles size={14} />
+                  <Sparkles size={13} />
                   <span>{isFormatting ? 'Beautifying...' : 'Format Code'}</span>
                 </>
               )}
             </button>
             
-            <button onClick={handleClear} className="btn-secondary py-1.5" title="Clear Input">
-              <Trash2 size={14} />
+            <button 
+              onClick={handleClear} 
+              className="btn-secondary py-1.5 px-3 btn-spring text-red-600 hover:text-red-700 hover:border-red-300 hover:bg-red-50/20" 
+              title="Clear Input"
+            >
+              <Trash2 size={13} />
             </button>
           </div>
         </div>
 
         {/* SQL Specific Options Drawer */}
         {language === 'sql' && showSqlSettings && (
-          <div className="p-5 bg-zinc-50 border-t border-zinc-100 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-fade-in text-sm">
+          <div className="p-5 bg-zinc-50 border-t-2 border-zinc-200 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-fade-in text-sm dot-pattern">
             {/* SQL Casing */}
-            <div className="flex flex-col gap-2">
-              <span className="font-semibold text-xs text-zinc-500 uppercase tracking-wider">SQL Casing</span>
+            <div className="card p-4 bg-white flex flex-col gap-3">
+              <span className="font-extrabold text-[10px] text-zinc-400 font-mono uppercase tracking-widest border-b border-zinc-100 pb-1.5">SQL Casing</span>
               
               <div className="flex items-center justify-between gap-4">
-                <label className="text-zinc-600 text-xs">Keywords:</label>
+                <label className="text-zinc-600 text-xs font-mono font-bold">Keywords:</label>
                 <select 
                   value={sqlKeywordCase} 
                   onChange={(e) => setSqlKeywordCase(e.target.value as any)}
-                  className="btn-secondary py-1 px-2 text-xs bg-white"
-                  style={{ appearance: 'auto' }}
+                  className="py-0.5 px-2 text-xs"
                 >
                   <option value="upper">UPPERCASE</option>
                   <option value="lower">lowercase</option>
@@ -442,12 +477,11 @@ export default function Beautifier() {
               </div>
 
               <div className="flex items-center justify-between gap-4">
-                <label className="text-zinc-600 text-xs">Functions:</label>
+                <label className="text-zinc-600 text-xs font-mono font-bold">Functions:</label>
                 <select 
                   value={sqlFunctionCase} 
                   onChange={(e) => setSqlFunctionCase(e.target.value as any)}
-                  className="btn-secondary py-1 px-2 text-xs bg-white"
-                  style={{ appearance: 'auto' }}
+                  className="py-0.5 px-2 text-xs"
                 >
                   <option value="upper">UPPERCASE</option>
                   <option value="lower">lowercase</option>
@@ -456,12 +490,11 @@ export default function Beautifier() {
               </div>
 
               <div className="flex items-center justify-between gap-4">
-                <label className="text-zinc-600 text-xs">Data Types:</label>
+                <label className="text-zinc-600 text-xs font-mono font-bold">Data Types:</label>
                 <select 
                   value={sqlDataTypeCase} 
                   onChange={(e) => setSqlDataTypeCase(e.target.value as any)}
-                  className="btn-secondary py-1 px-2 text-xs bg-white"
-                  style={{ appearance: 'auto' }}
+                  className="py-0.5 px-2 text-xs"
                 >
                   <option value="upper">UPPERCASE</option>
                   <option value="lower">lowercase</option>
@@ -471,29 +504,28 @@ export default function Beautifier() {
             </div>
 
             {/* SQL Layout */}
-            <div className="flex flex-col gap-2">
-              <span className="font-semibold text-xs text-zinc-500 uppercase tracking-wider">Operators Placement</span>
-              <div className="flex items-center justify-between gap-4">
-                <label className="text-zinc-600 text-xs">Boolean break:</label>
+            <div className="card p-4 bg-white flex flex-col gap-3">
+              <span className="font-extrabold text-[10px] text-zinc-400 font-mono uppercase tracking-widest border-b border-zinc-100 pb-1.5">Operators Placement</span>
+              <div className="flex flex-col gap-2">
+                <label className="text-zinc-600 text-xs font-mono font-bold">Boolean break:</label>
                 <select 
                   value={sqlLogicalOperatorNewline} 
                   onChange={(e) => setSqlLogicalOperatorNewline(e.target.value as any)}
-                  className="btn-secondary py-1 px-2 text-xs bg-white"
-                  style={{ appearance: 'auto' }}
+                  className="py-1 px-2 text-xs w-full"
                 >
-                  <option value="before">Before Operator (e.g. AND at start)</option>
-                  <option value="after">After Operator (e.g. AND at end)</option>
+                  <option value="before">Before Operator (AND/OR start)</option>
+                  <option value="after">After Operator (AND/OR end)</option>
                 </select>
               </div>
             </div>
 
             {/* SQL Width */}
-            <div className="flex flex-col gap-2">
-              <span className="font-semibold text-xs text-zinc-500 uppercase tracking-wider">SQL Width Rules</span>
-              <div className="flex flex-col gap-1.5">
+            <div className="card p-4 bg-white flex flex-col gap-3">
+              <span className="font-extrabold text-[10px] text-zinc-400 font-mono uppercase tracking-widest border-b border-zinc-100 pb-1.5">SQL Width Rules</span>
+              <div className="flex flex-col gap-2">
                 <div className="flex items-center justify-between gap-4">
-                  <label className="text-zinc-600 text-xs">Wrap Threshold:</label>
-                  <span className="text-xs font-semibold text-zinc-800">{sqlExpressionWidth} chars</span>
+                  <label className="text-zinc-600 text-xs font-mono font-bold">Wrap Threshold:</label>
+                  <span className="text-xs font-mono font-extrabold text-[#ff6b00]">{sqlExpressionWidth} chars</span>
                 </div>
                 <input 
                   type="range" 
@@ -502,19 +534,19 @@ export default function Beautifier() {
                   step="5"
                   value={sqlExpressionWidth} 
                   onChange={(e) => setSqlExpressionWidth(parseInt(e.target.value))}
-                  className="w-full accent-black h-1.5 bg-zinc-200 rounded-lg appearance-none cursor-pointer"
+                  className="w-full accent-[#ff6b00] h-2 bg-zinc-200 rounded-lg appearance-none cursor-pointer border border-zinc-300"
                 />
-                <span className="text-[10px] text-zinc-400">Controls line wrapping inside parenthesized lists.</span>
+                <span className="text-[10px] text-zinc-400 font-mono font-bold">Controls list breaking.</span>
               </div>
             </div>
 
             {/* Info panel */}
-            <div className="flex flex-col gap-1.5 bg-zinc-100/80 p-3 rounded-md border border-zinc-200">
-              <span className="font-bold text-xs text-zinc-700 flex items-center gap-1">
-                <Sparkles size={12} className="text-zinc-500" />
+            <div className="card p-4 bg-zinc-50 flex flex-col gap-2 border-dashed">
+              <span className="font-extrabold text-[10px] text-zinc-700 font-mono uppercase tracking-widest flex items-center gap-1">
+                <Sparkles size={12} className="text-[#ff6b00]" />
                 Redgate Engine Active
               </span>
-              <p className="text-[11px] text-zinc-500 leading-normal">
+              <p className="text-[11px] text-zinc-500 leading-normal font-mono">
                 SQL dialect-aware token parsing formats your queries dynamically according to standard Redgate casing guidelines.
               </p>
             </div>
@@ -522,20 +554,53 @@ export default function Beautifier() {
         )}
       </div>
 
+      {/* Playful Success Popup Banner */}
+      {formatSuccess && (
+        <div className="absolute top-[80px] left-1/2 -translate-x-1/2 z-20 bg-zinc-950 text-white text-xs font-bold font-mono border-2 border-black rounded-xl px-5 py-3 animate-success-pop shadow-[4px_4px_0px_0px_#ff6b00] flex items-center gap-2.5">
+          <span className="relative flex h-2.5 w-2.5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
+          </span>
+          <span>{successMsg}</span>
+        </div>
+      )}
+
       {/* Editor Panels */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1 min-h-0">
         {/* Input Panel */}
         <div className="card dark-editor-card flex flex-col overflow-hidden">
-          <div className="border-b border-zinc-900 p-3 dark-terminal-header flex items-center justify-between">
+          <div className="border-b-2 border-zinc-200 p-2.5 px-4 dark-terminal-header flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="hidden sm:flex items-center gap-1.5 mr-1">
                 <span className="window-dot window-dot-red"></span>
                 <span className="window-dot window-dot-yellow"></span>
                 <span className="window-dot window-dot-green"></span>
               </div>
-              <span className="font-semibold text-xs text-zinc-400 uppercase tracking-wider">Raw Input Code</span>
+              <span className="font-bold text-xs uppercase tracking-wider font-mono">Raw Input Code</span>
             </div>
-            <span className="text-xs text-zinc-500">Edit directly below</span>
+            
+            {/* Quick Presets */}
+            <div className="flex items-center gap-2">
+              <span className="text-[9px] font-mono font-bold text-zinc-400 uppercase tracking-widest mr-1">Scramble Samples:</span>
+              <button 
+                onClick={() => loadPreset('js')} 
+                className="btn-terminal btn-spring py-0.5 px-2 text-[9px] font-mono font-bold"
+              >
+                JS
+              </button>
+              <button 
+                onClick={() => loadPreset('sql')} 
+                className="btn-terminal btn-spring py-0.5 px-2 text-[9px] font-mono font-bold"
+              >
+                SQL
+              </button>
+              <button 
+                onClick={() => loadPreset('html')} 
+                className="btn-terminal btn-spring py-0.5 px-2 text-[9px] font-mono font-bold"
+              >
+                HTML
+              </button>
+            </div>
           </div>
           <div className="flex-1 overflow-hidden">
             <Editor
@@ -546,8 +611,9 @@ export default function Beautifier() {
               theme="vs"
               options={{
                 minimap: { enabled: false },
-                fontSize: 13,
-                lineHeight: 20,
+                fontSize: 12,
+                lineHeight: 18,
+                fontFamily: "'JetBrains Mono', monospace",
                 automaticLayout: true,
                 scrollBeyondLastLine: false,
                 wordWrap: 'on',
@@ -560,28 +626,28 @@ export default function Beautifier() {
 
         {/* Output Panel */}
         <div className="card dark-editor-card flex flex-col overflow-hidden">
-          <div className="border-b border-zinc-900 p-3 dark-terminal-header flex items-center justify-between">
+          <div className="border-b-2 border-zinc-200 p-2.5 px-4 dark-terminal-header flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="hidden sm:flex items-center gap-1.5 mr-1">
                 <span className="window-dot window-dot-red"></span>
                 <span className="window-dot window-dot-yellow"></span>
                 <span className="window-dot window-dot-green"></span>
               </div>
-              <span className="font-semibold text-xs text-zinc-400 uppercase tracking-wider">Beautified Output</span>
+              <span className="font-bold text-xs uppercase tracking-wider font-mono">Beautified Output</span>
             </div>
             <div className="flex items-center gap-2">
               <button 
                 onClick={copyOutput} 
                 disabled={!outputCode}
-                className="btn-terminal disabled:opacity-40"
+                className="btn-terminal btn-spring disabled:opacity-40"
               >
-                {copied ? <Check size={12} className="text-green-500" /> : <Copy size={12} />}
+                {copied ? <Check size={12} className="text-green-600 animate-bounce" /> : <Copy size={12} />}
                 <span className="ml-1">{copied ? 'Copied' : 'Copy'}</span>
               </button>
               <button 
                 onClick={downloadCode} 
                 disabled={!outputCode}
-                className="btn-terminal disabled:opacity-40"
+                className="btn-terminal btn-spring disabled:opacity-40"
                 title="Download formatted file"
               >
                 <Download size={12} />
@@ -598,8 +664,9 @@ export default function Beautifier() {
               options={{
                 readOnly: true,
                 minimap: { enabled: true },
-                fontSize: 13,
-                lineHeight: 20,
+                fontSize: 12,
+                lineHeight: 18,
+                fontFamily: "'JetBrains Mono', monospace",
                 automaticLayout: true,
                 scrollBeyondLastLine: false,
                 wordWrap: 'on',

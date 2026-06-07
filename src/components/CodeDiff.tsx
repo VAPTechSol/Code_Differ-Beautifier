@@ -172,18 +172,19 @@ export default function CodeDiff() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const isIdentical = originalCode.trim() === modifiedCode.trim();
+
   return (
     <div className="animate-fade-in flex flex-col gap-4 flex-1 min-h-0">
       {/* Control bar */}
       <div className="card p-3 flex flex-wrap items-center justify-between gap-4 shrink-0">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-5">
           <div className="flex flex-col gap-1">
-            <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Language</span>
+            <span className="text-xs font-mono font-bold text-zinc-400 uppercase tracking-wider">Language</span>
             <select 
               value={language} 
               onChange={(e) => setLanguage(e.target.value)}
-              className="btn-secondary py-1.5 px-3 pr-8"
-              style={{ appearance: 'auto' }}
+              className="py-1 px-3 pr-8"
             >
               {LANGUAGES.map(lang => (
                 <option key={lang.value} value={lang.value}>{lang.label}</option>
@@ -192,54 +193,80 @@ export default function CodeDiff() {
           </div>
 
           <div className="flex flex-col gap-1">
-            <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Layout</span>
-            <div className="flex border border-zinc-200 rounded-md overflow-hidden bg-white">
+            <span className="text-xs font-mono font-bold text-zinc-400 uppercase tracking-wider">Layout</span>
+            <div className="flex bg-zinc-100/80 border-2 border-zinc-200 rounded-lg p-0.5">
               <button 
                 onClick={() => setSplitView(true)}
-                className={`p-2 transition-colors ${splitView ? 'bg-zinc-100 text-black' : 'hover:bg-zinc-50 text-zinc-500'}`}
+                className={`p-1 px-2.5 rounded-md transition-all btn-spring flex items-center justify-center gap-1.5 ${
+                  splitView 
+                    ? 'bg-zinc-950 text-white font-bold border border-black shadow-[1px_1px_0px_0px_#000000]' 
+                    : 'text-zinc-500 hover:text-zinc-950 border border-transparent'
+                }`}
                 title="Split View"
               >
-                <Columns size={16} />
+                <Columns size={13} />
+                <span className="text-[10px] font-bold font-mono">Split</span>
               </button>
               <button 
                 onClick={() => setSplitView(false)}
-                className={`p-2 transition-colors ${!splitView ? 'bg-zinc-100 text-black' : 'hover:bg-zinc-50 text-zinc-500'}`}
+                className={`p-1 px-2.5 rounded-md transition-all btn-spring flex items-center justify-center gap-1.5 ${
+                  !splitView 
+                    ? 'bg-zinc-950 text-white font-bold border border-black shadow-[1px_1px_0px_0px_#000000]' 
+                    : 'text-zinc-500 hover:text-zinc-950 border border-transparent'
+                }`}
                 title="Unified / Inline View"
               >
-                <Rows size={16} />
+                <Rows size={13} />
+                <span className="text-[10px] font-bold font-mono">Unified</span>
               </button>
+            </div>
+          </div>
+
+          {/* Playful Match Banner */}
+          <div className="flex flex-col gap-1">
+            <span className="text-xs font-mono font-bold text-zinc-400 uppercase tracking-wider">Match Status</span>
+            <div className="flex items-center min-h-[30px]">
+              {isIdentical ? (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 text-green-700 text-[11px] font-bold border-2 border-green-300 rounded-lg animate-success-pop font-mono">
+                  <span>Perfect Match! No drama here. 🤝</span>
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-orange-50 text-[#ff6b00] text-[11px] font-bold border-2 border-[#ff6b00]/30 rounded-lg font-mono">
+                  <span>Divergence detected! Code has drifted. 🚨</span>
+                </span>
+              )}
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <button onClick={handleSwap} className="btn-secondary" title="Swap Panels">
-            <ArrowLeftRight size={16} />
+        <div className="flex items-center gap-3">
+          <button onClick={handleSwap} className="btn-secondary py-1.5 px-3 btn-spring" title="Swap Panels">
+            <ArrowLeftRight size={14} />
             <span>Swap</span>
           </button>
           
-          <button onClick={handleClear} className="btn-secondary text-red-600 hover:text-red-700" title="Clear All">
-            <Trash2 size={16} />
+          <button onClick={handleClear} className="btn-secondary py-1.5 px-3 btn-spring text-red-600 hover:text-red-700 hover:border-red-300 hover:bg-red-50/20" title="Clear All">
+            <Trash2 size={14} />
             <span>Clear</span>
           </button>
         </div>
       </div>
 
       {/* Editor Panels Info & Action Buttons */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 shrink-0">
         {/* Original Code Header */}
-        <div className="card p-3 flex items-center justify-between dark-terminal-header">
+        <div className="card p-2 px-4 flex items-center justify-between dark-terminal-header border-b-0 rounded-b-none">
           <div className="flex items-center gap-3">
             <div className="hidden sm:flex items-center gap-1.5 mr-1">
               <span className="window-dot window-dot-red"></span>
               <span className="window-dot window-dot-yellow"></span>
               <span className="window-dot window-dot-green"></span>
             </div>
-            <FileText size={16} className="text-zinc-400" />
-            <span className="font-semibold text-sm">Original Code</span>
+            <FileText size={15} className="text-zinc-400" />
+            <span className="font-bold text-xs uppercase tracking-wider font-mono">Original Code</span>
           </div>
           <div className="flex items-center gap-2">
-            <label className="btn-terminal cursor-pointer">
+            <label className="btn-terminal cursor-pointer btn-spring">
               <Upload size={12} className="mr-1" />
               Upload
               <input 
@@ -251,27 +278,27 @@ export default function CodeDiff() {
             </label>
             <button 
               onClick={() => copyToClipboard(originalCode, setCopiedOriginal)} 
-              className="btn-terminal"
+              className="btn-terminal btn-spring"
             >
-              {copiedOriginal ? <Check size={12} className="text-green-500" /> : <Copy size={12} />}
+              {copiedOriginal ? <Check size={12} className="text-green-600" /> : <Copy size={12} />}
               <span className="ml-1">{copiedOriginal ? 'Copied' : 'Copy'}</span>
             </button>
           </div>
         </div>
 
         {/* Modified Code Header */}
-        <div className="card p-3 flex items-center justify-between dark-terminal-header">
+        <div className="card p-2 px-4 flex items-center justify-between dark-terminal-header border-b-0 rounded-b-none">
           <div className="flex items-center gap-3">
             <div className="hidden sm:flex items-center gap-1.5 mr-1">
               <span className="window-dot window-dot-red"></span>
               <span className="window-dot window-dot-yellow"></span>
               <span className="window-dot window-dot-green"></span>
             </div>
-            <FileText size={16} className="text-zinc-400" />
-            <span className="font-semibold text-sm">Modified Code</span>
+            <FileText size={15} className="text-zinc-400" />
+            <span className="font-bold text-xs uppercase tracking-wider font-mono">Modified Code</span>
           </div>
           <div className="flex items-center gap-2">
-            <label className="btn-terminal cursor-pointer">
+            <label className="btn-terminal cursor-pointer btn-spring">
               <Upload size={12} className="mr-1" />
               Upload
               <input 
@@ -283,9 +310,9 @@ export default function CodeDiff() {
             </label>
             <button 
               onClick={() => copyToClipboard(modifiedCode, setCopiedModified)} 
-              className="btn-terminal"
+              className="btn-terminal btn-spring"
             >
-              {copiedModified ? <Check size={12} className="text-green-500" /> : <Copy size={12} />}
+              {copiedModified ? <Check size={12} className="text-green-600" /> : <Copy size={12} />}
               <span className="ml-1">{copiedModified ? 'Copied' : 'Copy'}</span>
             </button>
           </div>
@@ -293,7 +320,7 @@ export default function CodeDiff() {
       </div>
 
       {/* Editor Container */}
-      <div className="card dark-editor-card overflow-hidden flex-1 min-h-0">
+      <div className="card dark-editor-card overflow-hidden flex-1 min-h-0 border-t-0 rounded-t-none">
         <DiffEditor
           height="100%"
           language={language}
@@ -307,8 +334,9 @@ export default function CodeDiff() {
             renderSideBySide: splitView,
             minimap: { enabled: true },
             scrollBeyondLastLine: false,
-            fontSize: 13,
-            lineHeight: 20,
+            fontSize: 12,
+            lineHeight: 18,
+            fontFamily: "'JetBrains Mono', monospace",
             automaticLayout: true,
             scrollbar: {
               verticalScrollbarSize: 10,

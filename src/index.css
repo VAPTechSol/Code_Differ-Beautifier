@@ -4,32 +4,32 @@
   --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
   
-  /* Premium Minimalist White Palette */
-  --color-bg-app: #fcfcfd;
+  /* Industrial White Palette */
+  --color-bg-app: #ffffff;
   --color-bg-card: #ffffff;
   
   --animate-subtle-fade: fadeIn 0.2s ease-out forwards;
-  --animate-float-slow: float-slow 25s ease-in-out infinite;
-  --animate-float-slower: float-slower 35s ease-in-out infinite;
-  --animate-float-medium: float-medium 20s ease-in-out infinite;
+  --animate-float-slow: float-slow 30s ease-in-out infinite;
+  --animate-float-slower: float-slower 45s ease-in-out infinite;
+  --animate-float-medium: float-medium 25s ease-in-out infinite;
 
   @keyframes float-slow {
     0%, 100% { transform: translate(0px, 0px) scale(1); }
-    50% { transform: translate(80px, 40px) scale(1.1); }
+    50% { transform: translate(60px, 30px) scale(1.08); }
   }
   @keyframes float-slower {
     0%, 100% { transform: translate(0px, 0px) scale(1); }
-    50% { transform: translate(-65px, -80px) scale(1.15); }
+    50% { transform: translate(-40px, -50px) scale(1.12); }
   }
   @keyframes float-medium {
     0%, 100% { transform: translate(0px, 0px) scale(1); }
-    50% { transform: translate(50px, -50px) scale(0.9); }
+    50% { transform: translate(30px, -30px) scale(0.92); }
   }
 }
 
 .dot-pattern {
-  background-image: radial-gradient(rgba(9, 9, 11, 0.03) 1px, transparent 1px);
-  background-size: 24px 24px;
+  background-image: radial-gradient(rgba(0, 0, 0, 0.05) 1.2px, transparent 1.2px);
+  background-size: 20px 20px;
 }
 
 /* Global resets and body styling */
@@ -38,58 +38,62 @@ html, body, #root {
   margin: 0;
   padding: 0;
   overflow: hidden;
+  background-color: #ffffff;
 }
 
 body {
-  background-color: var(--color-bg-app);
-  color: #09090b;
+  color: #18181b;
   letter-spacing: -0.01em;
   -webkit-font-smoothing: antialiased;
 }
 
-/* Custom Scrollbars for light theme */
+/* Custom Scrollbars for industrial theme */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: #f4f4f5;
+  border-left: 1px solid #e4e4e7;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.08);
-  border-radius: 99px;
+  background: #d4d4d8;
+  border: 2px solid #f4f4f5;
+  border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.16);
+  background: #a1a1aa;
 }
 
-/* Custom Select styling - elegant and minimal light select */
+/* Custom Select styling - stark industrial design */
 select {
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2371717a'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23ff6b00'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 12px center;
-  background-size: 12px;
+  background-size: 10px;
   outline: none;
   background-color: #ffffff;
-  border: 1px solid #e4e4e7;
+  border: 2px solid #e4e4e7;
   color: #18181b;
-  border-radius: 8px;
-  padding: 8px 36px 8px 12px;
-  font-size: 13px;
-  font-weight: 500;
+  border-radius: 6px;
+  padding: 6px 32px 6px 12px;
+  font-size: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600;
   cursor: pointer;
+  box-shadow: 1px 1px 0px 0px rgba(0, 0, 0, 0.05);
   transition: all 0.15s ease;
 }
 
 select:hover {
   background-color: #fafafa;
-  border-color: #d4d4d8;
+  border-color: #ff6b00;
 }
 
 select:focus {
-  border-color: #09090b;
-  box-shadow: 0 0 0 2px rgba(9, 9, 11, 0.04);
+  border-color: #ff6b00;
+  box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.15);
 }
 
 /* Monaco editor light integration styling */
@@ -101,22 +105,22 @@ select:focus {
 
 .monaco-editor .margin {
   background-color: #ffffff !important;
-  border-right: 1px solid rgba(228, 228, 231, 0.5) !important;
+  border-right: 2px solid #e4e4e7 !important;
 }
 
 /* Custom Tailwind utility classes defined using Tailwind @utility directive */
 @utility card {
-  background: var(--color-bg-card);
-  border: 1px solid #e4e4e7;
-  border-radius: 12px;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.02), 0 4px 12px 0 rgba(0, 0, 0, 0.03);
-  transition: all 0.2s ease;
+  background: #ffffff;
+  border: 2px solid #e4e4e7;
+  border-radius: 8px;
+  box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   position: relative;
   z-index: 10;
 
   &:hover {
-    border-color: #d4d4d8;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.02), 0 8px 24px 0 rgba(0, 0, 0, 0.06);
+    border-color: #18181b;
+    box-shadow: 4px 4px 0px 0px rgba(255, 107, 0, 0.15);
   }
 }
 
@@ -125,23 +129,37 @@ select:focus {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background-color: #09090b;
+  background-color: #ff6b00;
   color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  padding: 10px 18px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
+  border: 2px solid #000000;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  transition: all 0.15s ease;
+  box-shadow: 2px 2px 0px 0px #000000;
+  transition: all 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
-  &:hover {
-    background-color: #27272a;
+  &:hover:not(:disabled) {
+    background-color: #ff7c1a;
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0px 0px #000000;
   }
 
-  &:active {
-    transform: translateY(0.5px);
+  &:active:not(:disabled) {
+    background-color: #e05e00;
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0px 0px #000000;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+    border-color: #a1a1aa;
+    background-color: #d4d4d8;
   }
 }
 
@@ -151,19 +169,25 @@ select:focus {
   justify-content: center;
   gap: 8px;
   background-color: #ffffff;
-  color: #27272a;
-  border: 1px solid #e4e4e7;
-  padding: 10px 16px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 550;
+  color: #18181b;
+  border: 2px solid #e4e4e7;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s ease;
+  box-shadow: 1px 1px 0px 0px rgba(0, 0, 0, 0.05);
+  transition: all 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
   &:hover:not(:disabled) {
-    background-color: #fafafa;
-    border-color: #d4d4d8;
-    color: #09090b;
+    border-color: #ff6b00;
+    color: #ff6b00;
+    box-shadow: 2px 2px 0px 0px rgba(255, 107, 0, 0.1);
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.97);
   }
 
   &:disabled {
@@ -179,68 +203,95 @@ select:focus {
   gap: 6px;
   background-color: #ffffff;
   color: #52525b;
-  border: 1px solid #e4e4e7;
-  padding: 6px 12px;
-  border-radius: 6px;
+  border: 2px solid #e4e4e7;
+  padding: 4px 10px;
+  border-radius: 4px;
   font-size: 11px;
-  font-weight: 500;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
 
   &:hover {
     background-color: #fafafa;
-    color: #09090b;
-    border-color: #d4d4d8;
+    color: #ff6b00;
+    border-color: #ff6b00;
   }
 }
 
 @utility dark-terminal-header {
   background-color: #fafafa;
-  border-bottom: 1px solid #e4e4e7;
+  border-bottom: 2px solid #e4e4e7;
   color: #18181b;
+  font-family: 'JetBrains Mono', monospace;
 }
 
 @utility dark-editor-card {
   background-color: #ffffff;
-  border: 1px solid #e4e4e7;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.02), 0 4px 12px 0 rgba(0, 0, 0, 0.03);
-  border-radius: 12px;
-  transition: all 0.2s ease;
+  border: 2px solid #e4e4e7;
+  box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
   &:hover {
-    border-color: #d4d4d8;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.02), 0 8px 24px 0 rgba(0, 0, 0, 0.06);
+    border-color: #ff6b00;
+    box-shadow: 4px 4px 0px 0px rgba(255, 107, 0, 0.12);
   }
 }
 
 @utility window-dot {
-  width: 9px;
-  height: 9px;
+  width: 8px;
+  height: 8px;
+  border: 1px solid #18181b;
   border-radius: 99px;
 }
 
-@utility window-dot-red { background-color: #ff5f56; }
-@utility window-dot-yellow { background-color: #ffbd2e; }
-@utility window-dot-green { background-color: #27c93f; }
+@utility window-dot-red { background-color: #ff6b00; }
+@utility window-dot-yellow { background-color: #f5f5f5; }
+@utility window-dot-green { background-color: #18181b; }
 
 @utility hero-badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: rgba(9, 9, 11, 0.04);
-  border: 1px solid rgba(9, 9, 11, 0.08);
-  color: #27272a;
+  background: rgba(255, 107, 0, 0.08);
+  border: 2px solid #ff6b00;
+  color: #ff6b00;
   padding: 4px 12px;
   border-radius: 99px;
   font-size: 10px;
+  font-family: 'JetBrains Mono', monospace;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 
 @utility text-gradient {
-  background: linear-gradient(135deg, #09090b 0%, #3f3f46 100%);
+  background: linear-gradient(135deg, #18181b 0%, #52525b 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+@keyframes bounce-wink {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  15% { transform: scale(1.2) rotate(-5deg); }
+  30% { transform: scale(0.9) rotate(5deg); }
+  45% { transform: scale(1.1) rotate(-2deg); }
+  60% { transform: scale(0.98) rotate(2deg); }
+  75% { transform: scale(1.02) rotate(-1deg); }
+}
+
+.animate-bounce-wink {
+  animation: bounce-wink 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes success-pop {
+  0% { transform: scale(0.8); opacity: 0; }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.animate-success-pop {
+  animation: success-pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }

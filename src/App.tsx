@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   GitCompare, 
   Database, 
@@ -16,6 +16,29 @@ type Tab = 'diff' | 'sql-compare' | 'beautifier';
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>('diff');
 
+  const funStates = [
+    "Ready to Rumble",
+    "Ingesting Caffeine",
+    "Polishing Pixels",
+    "Analyzing Chakras",
+    "Compiling micro-bugs",
+    "Consulting StackOverflow",
+    "Reticulating Splines",
+    "Doing Black Magic",
+    "Wrangling brackets"
+  ];
+  const [funStatus, setFunStatus] = useState(funStates[0]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setFunStatus(prev => {
+        const idx = funStates.indexOf(prev);
+        return funStates[(idx + 1) % funStates.length];
+      });
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
   const navigationItems = [
     { id: 'diff' as Tab, label: 'Code Compare', icon: GitCompare, description: 'Diff side-by-side or inline code changes' },
     { id: 'sql-compare' as Tab, label: 'SQL Compare', icon: Database, description: 'Compare SQL queries with formatting options' },
@@ -23,38 +46,44 @@ function App() {
   ];
 
   return (
-    <div className="app-container relative font-sans flex flex-col min-h-screen text-zinc-900 bg-[#fcfcfd] overflow-hidden">
+    <div className="app-container relative font-sans flex flex-col min-h-screen text-zinc-900 bg-[#ffffff] overflow-hidden">
       
-      {/* Ambient Animated Glowing Backdrop Blobs */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-        {/* Soft Indigo Blob */}
-        <div className="absolute -top-[15%] -left-[10%] w-[600px] h-[600px] rounded-full bg-indigo-200/20 blur-[130px] animate-float-slow"></div>
-        {/* Soft Violet/Pink Blob */}
-        <div className="absolute -bottom-[15%] -right-[10%] w-[700px] h-[700px] rounded-full bg-violet-200/15 blur-[150px] animate-float-slower"></div>
-        {/* Soft Emerald/Amber Blob */}
-        <div className="absolute top-[30%] right-[15%] w-[450px] h-[450px] rounded-full bg-emerald-100/10 blur-[120px] animate-float-medium"></div>
-      </div>
-
-      {/* Grid Dot Overlay */}
-      <div className="absolute inset-0 dot-pattern pointer-events-none z-0 opacity-70"></div>
+      {/* Blueprint Dot Overlay */}
+      <div className="absolute inset-0 dot-pattern pointer-events-none z-0 opacity-85"></div>
 
       {/* Top Premium Navbar */}
-      <header className="header relative z-10 sticky top-0 bg-white/85 border-b border-zinc-200/80 px-6 md:px-10 flex items-center justify-between backdrop-blur-md">
+      <header className="header relative z-10 sticky top-0 bg-white/90 border-b-2 border-zinc-200/80 px-6 md:px-10 flex items-center justify-between backdrop-blur-md">
         
         {/* Brand Logo */}
         <div className="flex items-center gap-3 shrink-0 group cursor-pointer">
-          <div className="relative p-2 bg-zinc-950 rounded-xl text-white shadow-md flex items-center justify-center overflow-hidden border border-zinc-800 transition-transform duration-300 group-hover:scale-105">
-            {/* Pulsing inner gradient */}
-            <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 via-violet-600 to-pink-500 opacity-80 group-hover:opacity-100 transition-opacity duration-300 animate-pulse"></div>
-            <svg className="relative z-10 w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M4 10h12" className="group-hover:translate-x-0.5 transition-transform duration-200" />
-              <path d="M4 14h12" className="group-hover:-translate-x-0.5 transition-transform duration-200" />
-              <path d="M12 6L8 10L12 14" className="group-hover:scale-105 transition-transform duration-200" />
-              <path d="M20 4v16" className="animate-pulse" />
+          <div className="relative p-2 bg-zinc-950 rounded-xl text-white shadow-[2px_2px_0px_0px_#000000] flex items-center justify-center overflow-hidden border-2 border-black transition-transform duration-300 group-hover:scale-105">
+            {/* Hover Orange Glow */}
+            <div className="absolute inset-0 bg-gradient-to-br from-orange-500 via-orange-600 to-amber-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            {/* Winking brackets SVG */}
+            <svg 
+              className="relative z-10 w-5.5 h-5.5 text-white group-hover:animate-bounce-wink" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2.5" 
+              strokeLinecap="round" 
+              strokeLinejoin="round"
+            >
+              {/* Left Bracket */}
+              <path d="M8 3H5a2 2 0 0 0-2 2v3a2 2 0 0 1-2 2 2 2 0 0 1 2 2v3a2 2 0 0 0 2 2h3" />
+              {/* Right Bracket */}
+              <path d="M16 3h3a2 2 0 0 1 2 2v3a2 2 0 0 0 2 2 2 2 0 0 0-2 2v3a2 2 0 0 1-2 2h-3" />
+              {/* Eye Left */}
+              <circle cx="9.5" cy="11.5" r="1.2" fill="currentColor" />
+              {/* Eye Right (Winks on Hover) */}
+              <circle cx="14.5" cy="11.5" r="1.2" fill="currentColor" className="group-hover:hidden" />
+              <path d="M13.5 12.5a1.5 1.5 0 0 1 2-1" stroke="currentColor" strokeWidth="2" className="hidden group-hover:block" />
+              {/* Smile */}
+              <path d="M11 14.5a1.5 1.5 0 0 0 2 0" stroke="currentColor" strokeWidth="1.5" />
             </svg>
           </div>
           <div>
-            <span className="font-extrabold text-base tracking-tight text-zinc-950 block leading-none bg-gradient-to-r from-zinc-950 to-zinc-700 bg-clip-text text-transparent group-hover:from-indigo-600 group-hover:to-violet-600 transition-all duration-300">
+            <span className="font-extrabold text-base tracking-tight text-zinc-950 block leading-none transition-colors duration-300 group-hover:text-[#ff6b00]">
               Kollate
             </span>
             <span className="text-[9px] text-zinc-400 font-bold tracking-widest uppercase mt-1.5 block">
@@ -64,7 +93,7 @@ function App() {
         </div>
 
         {/* Navigation Pills */}
-        <nav className="flex items-center bg-zinc-100/80 p-1 rounded-xl border border-zinc-200/60 backdrop-blur-sm">
+        <nav className="flex items-center bg-zinc-100/60 p-1 rounded-xl border-2 border-zinc-200 backdrop-blur-sm">
           {navigationItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -72,14 +101,14 @@ function App() {
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-left transition-all ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-150 btn-spring ${
                   isActive
-                    ? 'active font-semibold shadow-sm'
-                    : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50/50'
+                    ? 'bg-[#ff6b00] text-white font-bold border-2 border-black shadow-[2px_2px_0px_0px_#000000]'
+                    : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-200/40 border-2 border-transparent'
                 }`}
               >
-                <Icon size={14} className={isActive ? 'text-zinc-950' : 'text-zinc-400'} />
-                <span className="text-xs font-semibold leading-none">{item.label}</span>
+                <Icon size={14} className={isActive ? 'text-white' : 'text-zinc-400'} />
+                <span className="text-xs font-bold leading-none">{item.label}</span>
               </button>
             );
           })}
@@ -87,9 +116,13 @@ function App() {
 
         {/* Status Indicator & Links */}
         <div className="flex items-center gap-6 shrink-0">
-          <div className="hidden md:flex items-center gap-2 text-xs font-semibold tracking-wider text-zinc-400 uppercase bg-zinc-950 px-3 py-1.5 rounded-full border border-zinc-800">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
-            <span>Status: Ready</span>
+          <div className="hidden md:flex items-center gap-2.5 text-[11px] font-bold tracking-wider text-zinc-700 bg-[#fafafa] border-2 border-zinc-200 px-4 py-1.5 rounded-lg shadow-[1px_1px_0px_0px_rgba(0,0,0,0.05)]">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#ff6b00]"></span>
+            </span>
+            <span className="font-mono text-zinc-400">Status:</span>
+            <span className="font-mono text-[#ff6b00]">{funStatus}</span>
           </div>
           
           <a 
@@ -114,7 +147,7 @@ function App() {
       </main>
 
       {/* Modern Compact Footer */}
-      <footer className="relative z-10 bg-white/85 border-t border-zinc-200/80 py-3.5 px-6 md:px-10 flex flex-col sm:flex-row items-center justify-between text-[11px] text-zinc-400 shrink-0 backdrop-blur-md">
+      <footer className="relative z-10 bg-white/90 border-t-2 border-zinc-200/80 py-3.5 px-6 md:px-10 flex flex-col sm:flex-row items-center justify-between text-[11px] text-zinc-400 shrink-0 backdrop-blur-md">
         <div>
           © {new Date().getFullYear()} Kollate Studio. All rights reserved.
         </div>
