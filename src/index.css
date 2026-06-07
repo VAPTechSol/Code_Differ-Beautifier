@@ -5,10 +5,31 @@
   --font-mono: 'JetBrains Mono', monospace;
   
   /* Premium Minimalist White Palette */
-  --color-bg-app: #f9f9fb;
+  --color-bg-app: #fcfcfd;
   --color-bg-card: #ffffff;
   
   --animate-subtle-fade: fadeIn 0.2s ease-out forwards;
+  --animate-float-slow: float-slow 25s ease-in-out infinite;
+  --animate-float-slower: float-slower 35s ease-in-out infinite;
+  --animate-float-medium: float-medium 20s ease-in-out infinite;
+
+  @keyframes float-slow {
+    0%, 100% { transform: translate(0px, 0px) scale(1); }
+    50% { transform: translate(80px, 40px) scale(1.1); }
+  }
+  @keyframes float-slower {
+    0%, 100% { transform: translate(0px, 0px) scale(1); }
+    50% { transform: translate(-65px, -80px) scale(1.15); }
+  }
+  @keyframes float-medium {
+    0%, 100% { transform: translate(0px, 0px) scale(1); }
+    50% { transform: translate(50px, -50px) scale(0.9); }
+  }
+}
+
+.dot-pattern {
+  background-image: radial-gradient(rgba(9, 9, 11, 0.03) 1px, transparent 1px);
+  background-size: 24px 24px;
 }
 
 /* Global resets and body styling */

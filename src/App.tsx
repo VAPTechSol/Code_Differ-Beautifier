@@ -3,7 +3,6 @@ import {
   GitCompare, 
   Database, 
   Sparkles, 
-  Code2, 
   ExternalLink
 } from 'lucide-react';
 import CodeDiff from './components/CodeDiff';
@@ -24,24 +23,48 @@ function App() {
   ];
 
   return (
-    <div className="app-container font-sans flex flex-col min-h-screen text-zinc-900 bg-zinc-50">
+    <div className="app-container relative font-sans flex flex-col min-h-screen text-zinc-900 bg-[#fcfcfd] overflow-hidden">
       
+      {/* Ambient Animated Glowing Backdrop Blobs */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        {/* Soft Indigo Blob */}
+        <div className="absolute -top-[15%] -left-[10%] w-[600px] h-[600px] rounded-full bg-indigo-200/20 blur-[130px] animate-float-slow"></div>
+        {/* Soft Violet/Pink Blob */}
+        <div className="absolute -bottom-[15%] -right-[10%] w-[700px] h-[700px] rounded-full bg-violet-200/15 blur-[150px] animate-float-slower"></div>
+        {/* Soft Emerald/Amber Blob */}
+        <div className="absolute top-[30%] right-[15%] w-[450px] h-[450px] rounded-full bg-emerald-100/10 blur-[120px] animate-float-medium"></div>
+      </div>
+
+      {/* Grid Dot Overlay */}
+      <div className="absolute inset-0 dot-pattern pointer-events-none z-0 opacity-70"></div>
+
       {/* Top Premium Navbar */}
-      <header className="header sticky top-0 z-40 bg-white border-b border-zinc-200 px-6 md:px-10 flex items-center justify-between">
+      <header className="header relative z-10 sticky top-0 bg-white/85 border-b border-zinc-200/80 px-6 md:px-10 flex items-center justify-between backdrop-blur-md">
         
         {/* Brand Logo */}
-        <div className="flex items-center gap-2.5 shrink-0">
-          <div className="p-1.5 bg-zinc-950 rounded-lg text-white shadow-sm flex items-center justify-center">
-            <Code2 size={18} />
+        <div className="flex items-center gap-3 shrink-0 group cursor-pointer">
+          <div className="relative p-2 bg-zinc-950 rounded-xl text-white shadow-md flex items-center justify-center overflow-hidden border border-zinc-800 transition-transform duration-300 group-hover:scale-105">
+            {/* Pulsing inner gradient */}
+            <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 via-violet-600 to-pink-500 opacity-80 group-hover:opacity-100 transition-opacity duration-300 animate-pulse"></div>
+            <svg className="relative z-10 w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 10h12" className="group-hover:translate-x-0.5 transition-transform duration-200" />
+              <path d="M4 14h12" className="group-hover:-translate-x-0.5 transition-transform duration-200" />
+              <path d="M12 6L8 10L12 14" className="group-hover:scale-105 transition-transform duration-200" />
+              <path d="M20 4v16" className="animate-pulse" />
+            </svg>
           </div>
           <div>
-            <span className="font-bold text-base tracking-tight text-zinc-950 block leading-none">Align</span>
-            <span className="text-[9px] text-zinc-500 font-bold tracking-wider uppercase mt-1 block">Premium Dev Suite</span>
+            <span className="font-extrabold text-base tracking-tight text-zinc-950 block leading-none bg-gradient-to-r from-zinc-950 to-zinc-700 bg-clip-text text-transparent group-hover:from-indigo-600 group-hover:to-violet-600 transition-all duration-300">
+              Kollate
+            </span>
+            <span className="text-[9px] text-zinc-400 font-bold tracking-widest uppercase mt-1.5 block">
+              Premium Dev Suite
+            </span>
           </div>
         </div>
 
         {/* Navigation Pills */}
-        <nav className="flex items-center bg-zinc-100 p-1 rounded-xl border border-zinc-200/60">
+        <nav className="flex items-center bg-zinc-100/80 p-1 rounded-xl border border-zinc-200/60 backdrop-blur-sm">
           {navigationItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -51,7 +74,7 @@ function App() {
                 onClick={() => setActiveTab(item.id)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-left transition-all ${
                   isActive
-                    ? 'active font-semibold'
+                    ? 'active font-semibold shadow-sm'
                     : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50/50'
                 }`}
               >
@@ -82,7 +105,7 @@ function App() {
       </header>
 
       {/* Main Workspace Display Area */}
-      <main className="content-pane flex-1 overflow-hidden px-6 py-4 md:px-10 md:py-5 min-h-0 flex flex-col">
+      <main className="content-pane relative z-10 flex-1 overflow-hidden px-6 py-4 md:px-10 md:py-5 min-h-0 flex flex-col">
         <div className="max-w-[1600px] mx-auto w-full flex-1 flex flex-col min-h-0">
           {activeTab === 'diff' && <CodeDiff />}
           {activeTab === 'sql-compare' && <SqlCompare />}
@@ -91,9 +114,9 @@ function App() {
       </main>
 
       {/* Modern Compact Footer */}
-      <footer className="bg-white border-t border-zinc-200 py-3.5 px-6 md:px-10 flex flex-col sm:flex-row items-center justify-between text-[11px] text-zinc-400 shrink-0">
+      <footer className="relative z-10 bg-white/85 border-t border-zinc-200/80 py-3.5 px-6 md:px-10 flex flex-col sm:flex-row items-center justify-between text-[11px] text-zinc-400 shrink-0 backdrop-blur-md">
         <div>
-          © {new Date().getFullYear()} Align Studio. All rights reserved.
+          © {new Date().getFullYear()} Kollate Studio. All rights reserved.
         </div>
         <div className="flex items-center gap-4 mt-2 sm:mt-0 font-medium">
           <span>Version {VERSION}</span>
