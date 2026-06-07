@@ -3,11 +3,12 @@ import {
   GitCompare, 
   Database, 
   Sparkles, 
-  ExternalLink
+  Coffee
 } from 'lucide-react';
 import CodeDiff from './components/CodeDiff';
 import SqlCompare from './components/SqlCompare';
 import Beautifier from './components/Beautifier';
+import CoffeeModal from './components/CoffeeModal';
 import './App.css';
 import { VERSION } from './version';
 
@@ -15,6 +16,7 @@ type Tab = 'diff' | 'sql-compare' | 'beautifier';
 
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>('diff');
+  const [isCoffeeOpen, setIsCoffeeOpen] = useState(false);
 
   const funStates = [
     "Ready to Rumble",
@@ -125,15 +127,13 @@ function App() {
             <span className="font-mono text-[#ff6b00]">{funStatus}</span>
           </div>
           
-          <a 
-            href="https://github.com" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="text-xs text-zinc-400 hover:text-zinc-900 font-medium flex items-center gap-1 transition-colors"
+          <button 
+            onClick={() => setIsCoffeeOpen(true)}
+            className="text-xs text-zinc-600 hover:text-zinc-950 font-bold font-mono border-2 border-dashed border-zinc-300 hover:border-black px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all btn-spring"
           >
-            <span>Docs</span>
-            <ExternalLink size={11} />
-          </a>
+            <Coffee size={13} className="text-[#ff6b00]" />
+            <span>Coffee & Destress</span>
+          </button>
         </div>
       </header>
 
@@ -157,6 +157,9 @@ function App() {
           <span>Made with ❤️ by <a href="mailto:info@vaptechsol.com" className="underline hover:text-zinc-800 transition-colors">VAPTechSol</a></span>
         </div>
       </footer>
+
+      {/* Coffee & Destress Station Drawer */}
+      <CoffeeModal isOpen={isCoffeeOpen} onClose={() => setIsCoffeeOpen(false)} onOpen={() => setIsCoffeeOpen(true)} />
     </div>
   );
 }
