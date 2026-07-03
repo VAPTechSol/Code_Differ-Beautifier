@@ -11,6 +11,7 @@ import {
   EyeOff,
   Sliders
 } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
 const SQL_DIALECTS = [
   { value: 'sql', label: 'Standard SQL' },
@@ -21,6 +22,7 @@ const SQL_DIALECTS = [
 ];
 
 export default function SqlCompare() {
+  const { theme } = useTheme();
   const [dialect, setDialect] = useState<'sql' | 'mysql' | 'postgresql' | 'plsql' | 'tsql'>(() => {
     return (localStorage.getItem('kollidr-sql-dialect') as any) || 'sql';
   });
@@ -225,7 +227,7 @@ export default function SqlCompare() {
   return (
     <div className="animate-fade-in flex flex-col gap-4 flex-1 min-h-0">
       {/* SQL Compare Settings Toolbar */}
-      <div className="card bg-white flex flex-col overflow-hidden border-2 border-zinc-200 shrink-0">
+      <div className="card flex flex-col overflow-hidden border-2 border-zinc-200 shrink-0">
         <div className="p-4 flex flex-wrap items-center justify-between gap-4 border-b-2 border-zinc-200">
           <div className="flex flex-wrap items-center gap-6">
             <div className="flex flex-col gap-1">
@@ -467,7 +469,7 @@ export default function SqlCompare() {
           original={displayOriginal}
           modified={displayModified}
           onMount={handleEditorMount}
-          theme="vs"
+          theme={theme === 'dark' ? 'vs-dark' : 'vs'}
           options={{
             originalEditable: true,
             readOnly: false,

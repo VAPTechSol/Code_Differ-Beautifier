@@ -220,13 +220,13 @@ export default function DestressZone() {
     <div className="animate-fade-in flex flex-col gap-6 flex-1 min-h-0 overflow-y-auto pb-10">
       
       {/* Intro Header */}
-      <div className="card bg-white p-6 border-2 border-zinc-200 rounded-xl dot-pattern relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6 shadow-[4px_4px_0px_0px_#000000]">
+      <div className="card p-6 border-2 border-zinc-200 rounded-xl dot-pattern relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6 shadow-[4px_4px_0px_0px_#000000]">
         <div className="flex flex-col gap-1.5 text-center md:text-left">
           <div className="flex items-center justify-center md:justify-start gap-2.5">
             <span className="p-1.5 bg-[#ff6b00] rounded-xl text-black border-2 border-black flex items-center justify-center">
               <Smile size={18} />
             </span>
-            <h1 className="font-extrabold text-xl font-mono uppercase tracking-wider text-zinc-950">
+            <h1 className="font-extrabold text-xl font-mono uppercase tracking-wider text-zinc-950 dark:text-zinc-50">
               Developer Destress & Productivity Zone
             </h1>
           </div>
@@ -247,7 +247,7 @@ export default function DestressZone() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
         {/* 1. THE PANIC BUTTON */}
-        <div className="card bg-white border-2 border-zinc-200 rounded-xl overflow-hidden flex flex-col shadow-[4px_4px_0px_0px_#000000] relative">
+        <div className="card border-2 border-zinc-200 rounded-xl overflow-hidden flex flex-col shadow-[4px_4px_0px_0px_#000000] relative">
           <div className="p-3 bg-zinc-950 border-b-2 border-black text-white font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
             <Zap size={13} className="text-[#ff6b00]" />
             <span>Emergency excuse generator</span>
@@ -280,7 +280,7 @@ export default function DestressZone() {
         </div>
 
         {/* 2. BUG BOSS BATTLER */}
-        <div className="card bg-white border-2 border-zinc-200 rounded-xl overflow-hidden flex flex-col shadow-[4px_4px_0px_0px_#000000]">
+        <div className="card border-2 border-zinc-200 rounded-xl overflow-hidden flex flex-col shadow-[4px_4px_0px_0px_#000000]">
           <div className="p-3 bg-zinc-950 border-b-2 border-black text-white font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
             <Skull size={13} className="text-[#ff6b00]" />
             <span>Legacy Code Bug Battler</span>
@@ -302,7 +302,7 @@ export default function DestressZone() {
                   <Skull size={20} className={bossHp > 0 && bossStatus !== 'dead' ? "animate-pulse" : ""} />
                 </div>
                 <div>
-                  <span className={`font-mono text-xs font-bold block ${bossHp <= 0 ? 'text-zinc-500 line-through' : 'text-zinc-900'}`}>
+                  <span className={`font-mono text-xs font-bold block ${bossHp <= 0 ? 'text-zinc-500 line-through' : 'text-zinc-900 dark:text-zinc-100'}`}>
                     {bossHp <= 0 ? 'Clean Codebase 🎉' : 'Legacy Spaghetti Code'}
                   </span>
                   <span className="text-[9px] font-mono text-zinc-400 font-bold">
@@ -356,7 +356,7 @@ export default function DestressZone() {
         </div>
 
         {/* 3. PRODUCTIVITY CLICKER */}
-        <div className="card bg-white border-2 border-zinc-200 rounded-xl overflow-hidden flex flex-col shadow-[4px_4px_0px_0px_#000000]">
+        <div className="card border-2 border-zinc-200 rounded-xl overflow-hidden flex flex-col shadow-[4px_4px_0px_0px_#000000]">
           <div className="p-3 bg-zinc-950 border-b-2 border-black text-white font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
             <Coffee size={13} className="text-[#ff6b00]" />
             <span>Productivity Simulator</span>
@@ -372,7 +372,7 @@ export default function DestressZone() {
               </div>
               <div className="flex flex-col text-right">
                 <span className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider">Passive Speed</span>
-                <span className="text-sm font-mono font-bold text-zinc-800">{cps} LOC/sec</span>
+                <span className="text-sm font-mono font-bold text-zinc-800 dark:text-zinc-100">{cps} LOC/sec</span>
               </div>
             </div>
 
@@ -398,14 +398,14 @@ export default function DestressZone() {
                       disabled={!canBuy}
                       className={`flex items-center justify-between p-1.5 px-2.5 border-2 rounded-lg text-left transition-all ${
                         canBuy 
-                          ? 'border-zinc-300 hover:border-[#ff6b00] bg-white cursor-pointer' 
-                          : 'border-zinc-200 bg-zinc-50 opacity-60 cursor-not-allowed'
+                          ? 'border-zinc-300 hover:border-[#ff6b00] bg-card cursor-pointer' 
+                          : 'border-zinc-200 bg-zinc-50 dark:bg-zinc-800/40 opacity-60 cursor-not-allowed'
                       }`}
                     >
                       <div className="flex items-center gap-2">
                         <span className="text-xs">{upg.icon}</span>
                         <div>
-                          <span className="font-mono text-[10px] font-bold block text-zinc-800">{upg.name}</span>
+                          <span className="font-mono text-[10px] font-bold block text-zinc-800 dark:text-zinc-200">{upg.name}</span>
                           <span className="text-[8px] font-mono text-zinc-400 font-bold">Adds +{upg.cpsBonus} LOC/s (Owned: {upg.count})</span>
                         </div>
                       </div>
@@ -422,7 +422,7 @@ export default function DestressZone() {
         </div>
 
         {/* 4. HIGH-FIDELITY BUBBLE WRAP */}
-        <div className="card bg-white border-2 border-zinc-200 rounded-xl overflow-hidden flex flex-col shadow-[4px_4px_0px_0px_#000000]">
+        <div className="card border-2 border-zinc-200 rounded-xl overflow-hidden flex flex-col shadow-[4px_4px_0px_0px_#000000]">
           <div className="p-3 bg-zinc-950 border-b-2 border-black text-white font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
             <Smile size={13} className="text-[#ff6b00]" />
             <span>High-Fidelity Bubble Wrap</span>
@@ -501,7 +501,7 @@ export default function DestressZone() {
         </div>
 
         {/* 5. CODE INCINERATOR */}
-        <div className="card bg-white border-2 border-zinc-200 rounded-xl overflow-hidden flex flex-col shadow-[4px_4px_0px_0px_#000000]">
+        <div className="card border-2 border-zinc-200 rounded-xl overflow-hidden flex flex-col shadow-[4px_4px_0px_0px_#000000]">
           <div className="p-3 bg-zinc-950 border-b-2 border-black text-white font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
             <Flame size={13} className="text-[#ff6b00]" />
             <span>Spaghetti Code Incinerator</span>
@@ -538,7 +538,7 @@ export default function DestressZone() {
         </div>
 
         {/* 6. SUPPORT CAFFEINE STATION */}
-        <div className="card bg-white border-2 border-zinc-200 rounded-xl overflow-hidden flex flex-col shadow-[4px_4px_0px_0px_#000000]">
+        <div className="card border-2 border-zinc-200 rounded-xl overflow-hidden flex flex-col shadow-[4px_4px_0px_0px_#000000]">
           <div className="p-3 bg-zinc-950 border-b-2 border-black text-white font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
             <Coffee size={13} className="text-[#ff6b00]" />
             <span>Support VAPTechSol team</span>
@@ -546,7 +546,7 @@ export default function DestressZone() {
 
           <div className="p-5 flex flex-col gap-4 flex-1 dot-pattern justify-between">
             <div className="text-center flex flex-col gap-1">
-              <span className="font-extrabold text-xs text-zinc-900 font-mono">Buy a Real Coffee</span>
+              <span className="font-extrabold text-xs text-zinc-900 dark:text-zinc-100 font-mono">Buy a Real Coffee</span>
               <p className="text-[10px] text-zinc-400 font-mono leading-normal">
                 Help keep the developers awake. We run on pure caffeine and winking bracket algorithms!
               </p>
@@ -555,12 +555,12 @@ export default function DestressZone() {
             <div className="grid grid-cols-1 gap-2">
               <button 
                 onClick={() => handleSupportCoffee(1, 5)}
-                className="card p-2 bg-white hover:border-[#ff6b00] border-2 border-zinc-200 rounded-xl flex items-center justify-between px-3 btn-spring cursor-pointer"
+                className="card p-2 bg-card hover:border-[#ff6b00] border-2 border-zinc-200 dark:border-zinc-800 rounded-xl flex items-center justify-between px-3 btn-spring cursor-pointer"
               >
                 <div className="flex items-center gap-2">
                   <span className="text-base">☕</span>
                   <div className="text-left">
-                    <span className="font-extrabold text-[10px] text-zinc-900 font-mono block">1 Coffee</span>
+                    <span className="font-extrabold text-[10px] text-zinc-900 dark:text-zinc-100 font-mono block">1 Coffee</span>
                     <span className="text-[9px] text-[#ff6b00] font-mono font-bold">Fueled Debugging</span>
                   </div>
                 </div>
@@ -569,12 +569,12 @@ export default function DestressZone() {
               
               <button 
                 onClick={() => handleSupportCoffee(3, 15)}
-                className="card p-2 bg-white hover:border-[#ff6b00] border-2 border-zinc-200 rounded-xl flex items-center justify-between px-3 btn-spring cursor-pointer"
+                className="card p-2 bg-card hover:border-[#ff6b00] border-2 border-zinc-200 dark:border-zinc-800 rounded-xl flex items-center justify-between px-3 btn-spring cursor-pointer"
               >
                 <div className="flex items-center gap-2">
                   <span className="text-base">☕☕</span>
                   <div className="text-left">
-                    <span className="font-extrabold text-[10px] text-zinc-900 font-mono block">3 Coffees</span>
+                    <span className="font-extrabold text-[10px] text-zinc-900 dark:text-zinc-100 font-mono block">3 Coffees</span>
                     <span className="text-[9px] text-[#ff6b00] font-mono font-bold">Squashed Bugs</span>
                   </div>
                 </div>

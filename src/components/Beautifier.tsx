@@ -10,6 +10,7 @@ import {
   Download,
   Sliders
 } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
 const LANGUAGES = [
   // Popular first
@@ -73,6 +74,7 @@ const INITIAL_CODES: Record<string, string> = {
 };
 
 export default function Beautifier() {
+  const { theme } = useTheme();
   const [language, setLanguage] = useState('javascript');
   const [indentSize, setIndentSize] = useState(2);
   const [indentWithTabs, setIndentWithTabs] = useState(false);
@@ -382,7 +384,7 @@ export default function Beautifier() {
     <div className="animate-fade-in flex flex-col gap-4 flex-1 min-h-0 relative">
       
       {/* Settings bar */}
-      <div className="card bg-white flex flex-col overflow-hidden border-2 border-zinc-200 shrink-0">
+      <div className="card flex flex-col overflow-hidden border-2 border-zinc-200 shrink-0">
         <div className="p-4 flex flex-wrap items-center justify-between gap-4 border-b-2 border-zinc-200">
           <div className="flex flex-wrap items-center gap-6">
             <div className="flex flex-col gap-1">
@@ -648,7 +650,7 @@ export default function Beautifier() {
               language={language === 'typescript' ? 'typescript' : language === 'json' ? 'json' : language}
               value={inputCode}
               onMount={handleInputMount}
-              theme="vs"
+              theme={theme === 'dark' ? 'vs-dark' : 'vs'}
               options={{
                 minimap: { enabled: false },
                 fontSize: 12,
@@ -716,7 +718,7 @@ export default function Beautifier() {
               height="100%"
               language={language === 'typescript' ? 'typescript' : language === 'json' ? 'json' : language}
               value={outputCode}
-              theme="vs"
+              theme={theme === 'dark' ? 'vs-dark' : 'vs'}
               options={{
                 readOnly: true,
                 minimap: { enabled: true },

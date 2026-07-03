@@ -10,6 +10,7 @@ import {
   Check, 
   FileText 
 } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
 const LANGUAGES = [
   // Popular first
@@ -58,6 +59,7 @@ const LANGUAGES = [
 ];
 
 export default function CodeDiff() {
+  const { theme } = useTheme();
   const [language, setLanguage] = useState(() => {
     return localStorage.getItem('kollidr-diff-language') || 'javascript';
   });
@@ -337,7 +339,7 @@ export default function CodeDiff() {
           original={originalCode}
           modified={modifiedCode}
           onMount={handleEditorMount}
-          theme="vs"
+          theme={theme === 'dark' ? 'vs-dark' : 'vs'}
           options={{
             originalEditable: true,
             readOnly: false,
