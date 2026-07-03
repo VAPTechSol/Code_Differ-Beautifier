@@ -85,13 +85,25 @@ export default function SqlCompare() {
     return processed;
   };
 
-  // Re-run processing whenever settings or raw inputs change
+  // Re-run processing only when format settings change (not on raw edits to prevent cursor reset)
   useEffect(() => {
-    setDisplayOriginal(processSql(originalSql, true));
-    setDisplayModified(processSql(modifiedSql, true));
+    const formattedOrig = processSql(originalSql, true);
+    const formattedMod = processSql(modifiedSql, true);
+    setDisplayOriginal(formattedOrig);
+    setDisplayModified(formattedMod);
+    
+    // Pushing value to Monaco editor instances if mounted and value changed
+    if (diffEditorRef.current) {
+      const origEditor = diffEditorRef.current.getOriginalEditor();
+      const modEditor = diffEditorRef.current.getModifiedEditor();
+      if (origEditor && origEditor.getValue() !== formattedOrig) {
+        origEditor.setValue(formattedOrig);
+      }
+      if (modEditor && modEditor.getValue() !== formattedMod) {
+        modEditor.setValue(formattedMod);
+      }
+    }
   }, [
-    originalSql, 
-    modifiedSql, 
     dialect, 
     stripComments, 
     keywordCase, 
@@ -104,27 +116,48 @@ export default function SqlCompare() {
   const handleEditorMount = (editor: any) => {
     diffEditorRef.current = editor;
 
-    // Sync edited values back to raw state
+    // Sync edited values back to raw state and display state
     editor.getOriginalEditor().onDidChangeModelContent(() => {
       const val = editor.getOriginalEditor().getValue();
       setOriginalSql(val);
+      setDisplayOriginal(val); // Keeps display state in sync, preventing Monaco from resetting cursor
     });
 
     editor.getModifiedEditor().onDidChangeModelContent(() => {
       const val = editor.getModifiedEditor().getValue();
       setModifiedSql(val);
+      setDisplayModified(val); // Keeps display state in sync, preventing Monaco from resetting cursor
     });
   };
 
   const handleSwap = () => {
-    const temp = originalSql;
-    setOriginalSql(modifiedSql);
-    setModifiedSql(temp);
+    const tempOrig = originalSql;
+    const tempMod = modifiedSql;
+    
+    setOriginalSql(tempMod);
+    setModifiedSql(tempOrig);
+    setDisplayOriginal(tempMod);
+    setDisplayModified(tempOrig);
+    
+    if (diffEditorRef.current) {
+      const origEditor = diffEditorRef.current.getOriginalEditor();
+      const modEditor = diffEditorRef.current.getModifiedEditor();
+      if (origEditor) origEditor.setValue(tempMod);
+      if (modEditor) modEditor.setValue(tempOrig);
+    }
   };
 
   const handleClear = () => {
     setOriginalSql('');
     setModifiedSql('');
+    setDisplayOriginal('');
+    setDisplayModified('');
+    if (diffEditorRef.current) {
+      const origEditor = diffEditorRef.current.getOriginalEditor();
+      const modEditor = diffEditorRef.current.getModifiedEditor();
+      if (origEditor) origEditor.setValue('');
+      if (modEditor) modEditor.setValue('');
+    }
   };
 
   const formatInputsInPlace = () => {
@@ -132,10 +165,14 @@ export default function SqlCompare() {
     const formattedMod = processSql(modifiedSql, true);
     setOriginalSql(formattedOrig);
     setModifiedSql(formattedMod);
+    setDisplayOriginal(formattedOrig);
+    setDisplayModified(formattedMod);
     
     if (diffEditorRef.current) {
-      diffEditorRef.current.getOriginalEditor().setValue(formattedOrig);
-      diffEditorRef.current.getModifiedEditor().setValue(formattedMod);
+      const origEditor = diffEditorRef.current.getOriginalEditor();
+      const modEditor = diffEditorRef.current.getModifiedEditor();
+      if (origEditor) origEditor.setValue(formattedOrig);
+      if (modEditor) modEditor.setValue(formattedMod);
     }
   };
 
