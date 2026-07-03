@@ -4,9 +4,15 @@
   --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
   
-  /* Industrial White Palette */
-  --color-bg-app: #ffffff;
-  --color-bg-card: #ffffff;
+  /* Bind CSS theme variables */
+  --color-bg-app: var(--bg-app);
+  --color-bg-card: var(--bg-card);
+  --color-border-card: var(--border-card);
+  --color-border-hover: var(--border-hover);
+  --color-text-main: var(--text-main);
+  --color-text-muted: var(--text-muted);
+  --color-bg-terminal: var(--bg-terminal);
+  --color-accent-orange: #ff6b00;
   
   --animate-subtle-fade: fadeIn 0.2s ease-out forwards;
   --animate-float-slow: float-slow 30s ease-in-out infinite;
@@ -27,8 +33,36 @@
   }
 }
 
+/* Light Mode Variables (Industrial White) */
+:root {
+  --bg-app: #ffffff;
+  --bg-card: #ffffff;
+  --border-card: #e4e4e7;
+  --border-hover: #18181b;
+  --text-main: #18181b;
+  --text-muted: #71717a;
+  --bg-terminal: #fafafa;
+  --dot-color: rgba(0, 0, 0, 0.05);
+  
+  color-scheme: light;
+}
+
+/* Dark Mode Variables (Carbon Slate) */
+.dark {
+  --bg-app: #09090b;
+  --bg-card: #18181b;
+  --border-card: #27272a;
+  --border-hover: #f4f4f5;
+  --text-main: #f4f4f5;
+  --text-muted: #a1a1aa;
+  --bg-terminal: #09090b;
+  --dot-color: rgba(255, 255, 255, 0.06);
+  
+  color-scheme: dark;
+}
+
 .dot-pattern {
-  background-image: radial-gradient(rgba(0, 0, 0, 0.05) 1.2px, transparent 1.2px);
+  background-image: radial-gradient(var(--dot-color) 1.2px, transparent 1.2px);
   background-size: 20px 20px;
 }
 
@@ -38,11 +72,12 @@ html, body, #root {
   margin: 0;
   padding: 0;
   overflow: hidden;
-  background-color: #ffffff;
+  background-color: var(--bg-app);
 }
 
 body {
-  color: #18181b;
+  color: var(--text-main);
+  background-color: var(--bg-app);
   letter-spacing: -0.01em;
   -webkit-font-smoothing: antialiased;
 }
@@ -53,16 +88,16 @@ body {
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #f4f4f5;
-  border-left: 1px solid #e4e4e7;
+  background: var(--bg-app);
+  border-left: 1px solid var(--border-card);
 }
 ::-webkit-scrollbar-thumb {
-  background: #d4d4d8;
-  border: 2px solid #f4f4f5;
+  background: var(--border-card);
+  border: 2px solid var(--bg-app);
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #a1a1aa;
+  background: var(--text-muted);
 }
 
 /* Custom Select styling - stark industrial design */
@@ -73,9 +108,9 @@ select {
   background-position: right 12px center;
   background-size: 10px;
   outline: none;
-  background-color: #ffffff;
-  border: 2px solid #e4e4e7;
-  color: #18181b;
+  background-color: var(--bg-card);
+  border: 2px solid var(--border-card);
+  color: var(--text-main);
   border-radius: 6px;
   padding: 6px 32px 6px 12px;
   font-size: 12px;
@@ -87,7 +122,7 @@ select {
 }
 
 select:hover {
-  background-color: #fafafa;
+  background-color: var(--bg-terminal);
   border-color: #ff6b00;
 }
 
@@ -96,22 +131,26 @@ select:focus {
   box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.15);
 }
 
-/* Monaco editor light integration styling */
+/* Monaco editor theme override integration */
 .monaco-editor {
   padding-top: 12px;
   padding-bottom: 12px;
-  background-color: #ffffff !important;
+  background-color: var(--bg-card) !important;
 }
 
 .monaco-editor .margin {
-  background-color: #ffffff !important;
-  border-right: 2px solid #e4e4e7 !important;
+  background-color: var(--bg-card) !important;
+  border-right: 2px solid var(--border-card) !important;
+}
+
+.monaco-editor-background {
+  background-color: var(--bg-card) !important;
 }
 
 /* Custom Tailwind utility classes defined using Tailwind @utility directive */
 @utility card {
-  background: #ffffff;
-  border: 2px solid #e4e4e7;
+  background: var(--bg-card);
+  border: 2px solid var(--border-card);
   border-radius: 8px;
   box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 0.08);
   transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -119,7 +158,7 @@ select:focus {
   z-index: 10;
 
   &:hover {
-    border-color: #18181b;
+    border-color: var(--border-hover);
     box-shadow: 4px 4px 0px 0px rgba(255, 107, 0, 0.15);
   }
 }
@@ -158,8 +197,8 @@ select:focus {
     cursor: not-allowed;
     box-shadow: none;
     transform: none;
-    border-color: #a1a1aa;
-    background-color: #d4d4d8;
+    border-color: var(--border-card);
+    background-color: var(--bg-terminal);
   }
 }
 
@@ -168,9 +207,9 @@ select:focus {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background-color: #ffffff;
-  color: #18181b;
-  border: 2px solid #e4e4e7;
+  background-color: var(--bg-card);
+  color: var(--text-main);
+  border: 2px solid var(--border-card);
   padding: 8px 14px;
   border-radius: 6px;
   font-size: 12px;
@@ -201,9 +240,9 @@ select:focus {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  background-color: #ffffff;
-  color: #52525b;
-  border: 2px solid #e4e4e7;
+  background-color: var(--bg-card);
+  color: var(--text-muted);
+  border: 2px solid var(--border-card);
   padding: 4px 10px;
   border-radius: 4px;
   font-size: 11px;
@@ -213,22 +252,22 @@ select:focus {
   transition: all 0.15s ease;
 
   &:hover {
-    background-color: #fafafa;
+    background-color: var(--bg-terminal);
     color: #ff6b00;
     border-color: #ff6b00;
   }
 }
 
 @utility dark-terminal-header {
-  background-color: #fafafa;
-  border-bottom: 2px solid #e4e4e7;
-  color: #18181b;
+  background-color: var(--bg-terminal);
+  border-bottom: 2px solid var(--border-card);
+  color: var(--text-main);
   font-family: 'JetBrains Mono', monospace;
 }
 
 @utility dark-editor-card {
-  background-color: #ffffff;
-  border: 2px solid #e4e4e7;
+  background-color: var(--bg-card);
+  border: 2px solid var(--border-card);
   box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 0.08);
   border-radius: 8px;
   transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -242,13 +281,13 @@ select:focus {
 @utility window-dot {
   width: 8px;
   height: 8px;
-  border: 1px solid #18181b;
+  border: 1px solid var(--text-main);
   border-radius: 99px;
 }
 
 @utility window-dot-red { background-color: #ff6b00; }
-@utility window-dot-yellow { background-color: #f5f5f5; }
-@utility window-dot-green { background-color: #18181b; }
+@utility window-dot-yellow { background-color: var(--border-card); }
+@utility window-dot-green { background-color: var(--text-main); }
 
 @utility hero-badge {
   display: inline-flex;
@@ -267,7 +306,7 @@ select:focus {
 }
 
 @utility text-gradient {
-  background: linear-gradient(135deg, #18181b 0%, #52525b 100%);
+  background: linear-gradient(135deg, var(--text-main) 0%, var(--text-muted) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

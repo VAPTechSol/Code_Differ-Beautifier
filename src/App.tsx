@@ -3,13 +3,17 @@ import {
   GitCompare, 
   Database, 
   Sparkles, 
-  Coffee,
-  Smile
+  Smile,
+  Sun,
+  Moon,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import CodeDiff from './components/CodeDiff';
 import SqlCompare from './components/SqlCompare';
 import Beautifier from './components/Beautifier';
 import DestressZone from './components/DestressZone';
+import { useTheme } from './context/ThemeContext';
 import './App.css';
 import { VERSION } from './version';
 
@@ -17,6 +21,8 @@ type Tab = 'diff' | 'sql-compare' | 'beautifier' | 'destress';
 
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>('diff');
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const { theme, toggleTheme } = useTheme();
 
   const funStates = [
     "Ready to Rumble",
@@ -49,54 +55,55 @@ function App() {
   ];
 
   return (
-    <div className="app-container relative font-sans flex flex-col min-h-screen text-zinc-900 bg-[#ffffff] overflow-hidden">
+    <div className="flex flex-row h-screen w-screen overflow-hidden bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-sans">
       
-      {/* Blueprint Dot Overlay */}
-      <div className="absolute inset-0 dot-pattern pointer-events-none z-0 opacity-85"></div>
-
-      {/* Top Premium Navbar */}
-      <header className="header relative z-10 sticky top-0 bg-white/90 border-b-2 border-zinc-200/80 px-6 md:px-10 flex items-center justify-between backdrop-blur-md">
+      {/* Premium Collapsible Left Sidebar */}
+      <aside className={`relative z-20 h-full bg-zinc-50 dark:bg-zinc-900 border-r-2 border-zinc-200 dark:border-zinc-800 flex flex-col justify-between transition-all duration-300 ease-in-out select-none ${sidebarCollapsed ? 'w-18' : 'w-64'}`}>
         
-        {/* Brand Logo */}
-        <div className="flex items-center gap-3 shrink-0 group cursor-pointer">
-          <div className="relative p-2 bg-zinc-950 rounded-xl text-white shadow-[2px_2px_0px_0px_#000000] flex items-center justify-center overflow-hidden border-2 border-black transition-transform duration-300 group-hover:scale-105">
-            {/* Hover Orange Glow */}
-            <div className="absolute inset-0 bg-gradient-to-br from-orange-500 via-orange-600 to-amber-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            {/* Winking brackets SVG */}
-            <svg 
-              className="relative z-10 w-5.5 h-5.5 text-white group-hover:animate-bounce-wink" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2.5" 
-              strokeLinecap="round" 
-              strokeLinejoin="round"
-            >
-              {/* Left Bracket */}
-              <path d="M8 3H5a2 2 0 0 0-2 2v3a2 2 0 0 1-2 2 2 2 0 0 1 2 2v3a2 2 0 0 0 2 2h3" />
-              {/* Right Bracket */}
-              <path d="M16 3h3a2 2 0 0 1 2 2v3a2 2 0 0 0 2 2 2 2 0 0 0-2 2v3a2 2 0 0 1-2 2h-3" />
-              {/* Eye Left */}
-              <circle cx="9.5" cy="11.5" r="1.2" fill="currentColor" />
-              {/* Eye Right (Winks on Hover) */}
-              <circle cx="14.5" cy="11.5" r="1.2" fill="currentColor" className="group-hover:hidden" />
-              <path d="M13.5 12.5a1.5 1.5 0 0 1 2-1" stroke="currentColor" strokeWidth="2" className="hidden group-hover:block" />
-              {/* Smile */}
-              <path d="M11 14.5a1.5 1.5 0 0 0 2 0" stroke="currentColor" strokeWidth="1.5" />
-            </svg>
-          </div>
-          <div>
-            <span className="font-extrabold text-base tracking-tight text-zinc-950 block leading-none transition-colors duration-300 group-hover:text-[#ff6b00]">
-              Kollidr
-            </span>
-            <span className="text-[9px] text-zinc-400 font-bold tracking-widest uppercase mt-1.5 block">
-              Premium Dev Suite
-            </span>
+        {/* Brand Header */}
+        <div className="p-4 flex items-center justify-between border-b-2 border-zinc-200 dark:border-zinc-800 h-16 shrink-0 overflow-hidden">
+          <div className="flex items-center gap-3 cursor-pointer group">
+            <div className="relative p-2 bg-zinc-950 dark:bg-zinc-800 rounded-xl text-white shadow-[2px_2px_0px_0px_#000000] dark:shadow-[2px_2px_0px_0px_#ff6b00] flex items-center justify-center overflow-hidden border-2 border-black dark:border-zinc-700 transition-transform duration-300 group-hover:scale-105">
+              {/* Hover Orange Glow */}
+              <div className="absolute inset-0 bg-gradient-to-br from-orange-500 via-orange-600 to-amber-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              {/* Mascot SVG */}
+              <svg 
+                className="relative z-10 w-5.5 h-5.5 text-white group-hover:animate-bounce-wink" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2.5" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+              >
+                {/* Left Bracket */}
+                <path d="M8 3H5a2 2 0 0 0-2 2v3a2 2 0 0 1-2 2 2 2 0 0 1 2 2v3a2 2 0 0 0 2 2h3" />
+                {/* Right Bracket */}
+                <path d="M16 3h3a2 2 0 0 1 2 2v3a2 2 0 0 0 2 2 2 2 0 0 0-2 2v3a2 2 0 0 1-2 2h-3" />
+                {/* Eye Left */}
+                <circle cx="9.5" cy="11.5" r="1.2" fill="currentColor" />
+                {/* Eye Right (Winks on Hover) */}
+                <circle cx="14.5" cy="11.5" r="1.2" fill="currentColor" className="group-hover:hidden" />
+                <path d="M13.5 12.5a1.5 1.5 0 0 1 2-1" stroke="currentColor" strokeWidth="2" className="hidden group-hover:block" />
+                {/* Smile */}
+                <path d="M11 14.5a1.5 1.5 0 0 0 2 0" stroke="currentColor" strokeWidth="1.5" />
+              </svg>
+            </div>
+            {!sidebarCollapsed && (
+              <div className="animate-fade-in">
+                <span className="font-extrabold text-sm tracking-tight text-zinc-950 dark:text-white block leading-none transition-colors duration-300 group-hover:text-[#ff6b00]">
+                  Kollidr
+                </span>
+                <span className="text-[8px] text-zinc-400 dark:text-zinc-500 font-bold tracking-widest uppercase mt-1 block">
+                  Premium Dev Suite
+                </span>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Navigation Pills */}
-        <nav className="flex items-center bg-zinc-100/60 p-1 rounded-xl border-2 border-zinc-200 backdrop-blur-sm">
+        {/* Navigation stack */}
+        <nav className="flex-1 p-3 flex flex-col gap-2 overflow-y-auto min-h-0 mt-4">
           {navigationItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -104,61 +111,98 @@ function App() {
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-150 btn-spring ${
+                className={`flex items-center gap-3 p-2.5 rounded-xl transition-all duration-150 btn-spring group relative ${
                   isActive
-                    ? 'bg-[#ff6b00] text-white font-bold border-2 border-black shadow-[2px_2px_0px_0px_#000000]'
-                    : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-200/40 border-2 border-transparent'
-                }`}
+                    ? 'bg-[#ff6b00] text-white font-bold border-2 border-black dark:border-zinc-800 shadow-[2px_2px_0px_0px_#000000] dark:shadow-[2px_2px_0px_0px_#ff6b00]'
+                    : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-200/50 dark:hover:bg-zinc-800 border-2 border-transparent'
+                } ${sidebarCollapsed ? 'justify-center px-0' : 'px-3.5'}`}
+                title={sidebarCollapsed ? item.label : undefined}
               >
-                <Icon size={14} className={isActive ? 'text-white' : 'text-zinc-400'} />
-                <span className="text-xs font-bold leading-none">{item.label}</span>
+                <Icon size={16} className={isActive ? 'text-white' : 'text-zinc-400 dark:text-zinc-500 group-hover:text-[#ff6b00]'} />
+                {!sidebarCollapsed && (
+                  <div className="text-left animate-fade-in">
+                    <span className="text-xs font-mono font-bold leading-none block">{item.label}</span>
+                  </div>
+                )}
               </button>
             );
           })}
         </nav>
 
-        {/* Status Indicator & Links */}
-        <div className="flex items-center gap-6 shrink-0">
-          <div className="hidden md:flex items-center gap-2.5 text-[11px] font-bold tracking-wider text-zinc-700 bg-[#fafafa] border-2 border-zinc-200 px-4 py-1.5 rounded-lg shadow-[1px_1px_0px_0px_rgba(0,0,0,0.05)]">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#ff6b00]"></span>
-            </span>
-            <span className="font-mono text-zinc-400">Status:</span>
-            <span className="font-mono text-[#ff6b00]">{funStatus}</span>
-          </div>
+        {/* Sidebar Controls Footer */}
+        <div className="p-3 border-t-2 border-zinc-200 dark:border-zinc-800 flex flex-col gap-3 shrink-0 bg-zinc-50/50 dark:bg-zinc-900/40">
           
-          <button 
-            onClick={() => setActiveTab('destress')}
-            className={`text-xs font-bold font-mono border-2 border-dashed px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all btn-spring ${activeTab === 'destress' ? 'border-[#ff6b00] bg-[#ff6b00] text-white shadow-[2px_2px_0px_0px_#000000]' : 'border-zinc-300 hover:border-black text-zinc-600 hover:text-zinc-950'}`}
-          >
-            <Coffee size={13} className={activeTab === 'destress' ? 'text-white' : 'text-[#ff6b00]'} />
-            <span>Coffee & Destress</span>
-          </button>
-        </div>
-      </header>
+          {/* Heartbeat Status Indicator */}
+          {!sidebarCollapsed && (
+            <div className="flex items-center gap-2.5 text-[10px] font-mono font-bold text-zinc-600 dark:text-zinc-400 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-1.5 rounded-lg shadow-sm truncate animate-fade-in">
+              <span className="relative flex h-2 w-2 shrink-0">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#ff6b00]"></span>
+              </span>
+              <span className="text-zinc-400 truncate">Status: <strong className="text-[#ff6b00]">{funStatus}</strong></span>
+            </div>
+          )}
 
-      {/* Main Workspace Display Area */}
-      <main className="content-pane relative z-10 flex-1 overflow-hidden px-6 py-4 md:px-10 md:py-5 min-h-0 flex flex-col">
-        <div className="max-w-[1600px] mx-auto w-full flex-1 flex flex-col min-h-0">
-          {activeTab === 'diff' && <CodeDiff />}
-          {activeTab === 'sql-compare' && <SqlCompare />}
-          {activeTab === 'beautifier' && <Beautifier />}
-          {activeTab === 'destress' && <DestressZone />}
-        </div>
-      </main>
+          {/* Theme & Collapse Controls */}
+          <div className={`flex items-center justify-between ${sidebarCollapsed ? 'flex-col gap-3' : 'flex-row'}`}>
+            <button 
+              onClick={toggleTheme}
+              className="p-2 text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white hover:bg-white dark:hover:bg-zinc-800 border-2 border-zinc-200 dark:border-zinc-700 hover:border-black dark:hover:border-zinc-500 rounded-lg transition-all btn-spring cursor-pointer"
+              title={theme === 'dark' ? "Switch to Light Mode (Industrial White)" : "Switch to Dark Mode (Carbon Slate)"}
+            >
+              {theme === 'dark' ? <Sun size={15} className="text-amber-500" /> : <Moon size={15} className="text-[#ff6b00]" />}
+            </button>
 
-      {/* Modern Compact Footer */}
-      <footer className="relative z-10 bg-white/90 border-t-2 border-zinc-200/80 py-3.5 px-6 md:px-10 flex flex-col sm:flex-row items-center justify-between text-[11px] text-zinc-400 shrink-0 backdrop-blur-md">
-        <div>
-          © {new Date().getFullYear()} Kollidr Studio. All rights reserved.
+            <button 
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              className="p-2 text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white hover:bg-white dark:hover:bg-zinc-800 border-2 border-zinc-200 dark:border-zinc-700 hover:border-black dark:hover:border-zinc-500 rounded-lg transition-all btn-spring cursor-pointer"
+              title={sidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+            >
+              {sidebarCollapsed ? <ChevronRight size={15} /> : <ChevronLeft size={15} />}
+            </button>
+          </div>
         </div>
-        <div className="flex items-center gap-4 mt-2 sm:mt-0 font-medium">
-          <span>Version {VERSION}</span>
-          <span className="text-zinc-300">|</span>
-          <span>Made with ❤️ by <a href="mailto:info@vaptechsol.com" className="underline hover:text-zinc-800 transition-colors">VAPTechSol</a></span>
-        </div>
-      </footer>
+
+      </aside>
+
+      {/* Main Content Workspace Viewport */}
+      <div className="flex-1 flex flex-col h-full overflow-hidden bg-white dark:bg-zinc-950 relative">
+        
+        {/* Blueprint Dot Overlay */}
+        <div className="absolute inset-0 dot-pattern pointer-events-none z-0 opacity-85"></div>
+
+        {/* Main Workspace Display Area */}
+        <main className="content-pane relative z-10 flex-1 overflow-hidden px-6 py-4 md:px-10 md:py-5 min-h-0 flex flex-col">
+          <div className="max-w-[1600px] mx-auto w-full flex-1 flex flex-col min-h-0">
+            <div className={activeTab === 'diff' ? 'flex flex-col flex-1 min-h-0' : 'hidden'}>
+              <CodeDiff />
+            </div>
+            <div className={activeTab === 'sql-compare' ? 'flex flex-col flex-1 min-h-0' : 'hidden'}>
+              <SqlCompare />
+            </div>
+            <div className={activeTab === 'beautifier' ? 'flex flex-col flex-1 min-h-0' : 'hidden'}>
+              <Beautifier />
+            </div>
+            <div className={activeTab === 'destress' ? 'flex flex-col flex-1 min-h-0' : 'hidden'}>
+              <DestressZone />
+            </div>
+          </div>
+        </main>
+
+        {/* Modern Compact Footer */}
+        <footer className="relative z-10 bg-white/90 dark:bg-zinc-900/90 border-t-2 border-zinc-200/80 dark:border-zinc-800 py-3.5 px-6 md:px-10 flex flex-col sm:flex-row items-center justify-between text-[11px] text-zinc-400 dark:text-zinc-500 shrink-0 backdrop-blur-md">
+          <div>
+            © {new Date().getFullYear()} Kollidr Studio. All rights reserved.
+          </div>
+          <div className="flex items-center gap-4 mt-2 sm:mt-0 font-medium">
+            <span>Version {VERSION}</span>
+            <span className="text-zinc-300 dark:text-zinc-700">|</span>
+            <span>Made with ❤️ by <a href="mailto:info@vaptechsol.com" className="underline hover:text-zinc-800 dark:hover:text-zinc-300 transition-colors">VAPTechSol</a></span>
+          </div>
+        </footer>
+
+      </div>
+
     </div>
   );
 }

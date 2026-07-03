@@ -102,6 +102,40 @@ export default function Beautifier() {
   const [successMsg, setSuccessMsg] = useState(successPhrases[0]);
 
   const inputEditorRef = useRef<any>(null);
+  
+  // Draggable Splitter States
+  const [splitWidth, setSplitWidth] = useState(50);
+  const [isDragging, setIsDragging] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDragging || !containerRef.current) return;
+      const containerRect = containerRef.current.getBoundingClientRect();
+      const relativeX = e.clientX - containerRect.left;
+      const percentage = (relativeX / containerRect.width) * 100;
+      setSplitWidth(Math.max(20, Math.min(80, percentage)));
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    if (isDragging) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+    }
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging]);
 
   // Update input code default template when language changes
   const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -566,10 +600,16 @@ export default function Beautifier() {
       )}
 
       {/* Editor Panels */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1 min-h-0">
+      <div 
+        ref={containerRef}
+        className={`flex flex-col md:flex-row gap-2.5 flex-1 min-h-0 relative ${isDragging ? 'select-none' : ''}`}
+      >
         {/* Input Panel */}
-        <div className="card dark-editor-card flex flex-col overflow-hidden">
-          <div className="border-b-2 border-zinc-200 p-2.5 px-4 dark-terminal-header flex items-center justify-between">
+        <div 
+          style={{ width: window.innerWidth >= 768 ? `${splitWidth}%` : '100%' }}
+          className="card dark-editor-card flex flex-col overflow-hidden min-w-0"
+        >
+          <div className="border-b-2 border-zinc-200 dark:border-zinc-800 p-2.5 px-4 dark-terminal-header flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="hidden sm:flex items-center gap-1.5 mr-1">
                 <span className="window-dot window-dot-red"></span>
@@ -581,7 +621,7 @@ export default function Beautifier() {
             
             {/* Quick Presets */}
             <div className="flex items-center gap-2">
-              <span className="text-[9px] font-mono font-bold text-zinc-400 uppercase tracking-widest mr-1">Scramble Samples:</span>
+              <span className="text-[9px] font-mono font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mr-1">Scramble Samples:</span>
               <button 
                 onClick={() => loadPreset('js')} 
                 className="btn-terminal btn-spring py-0.5 px-2 text-[9px] font-mono font-bold"
@@ -624,9 +664,25 @@ export default function Beautifier() {
           </div>
         </div>
 
+        {/* Draggable Divider Splitter */}
+        <div 
+          onMouseDown={handleMouseDown}
+          className="hidden md:flex w-2.5 bg-zinc-100 hover:bg-[#ff6b00] active:bg-[#ff6b00] dark:bg-zinc-800 dark:hover:bg-[#ff6b00] dark:active:bg-[#ff6b00] cursor-col-resize transition-colors self-stretch rounded-full items-center justify-center relative z-20 group"
+          title="Drag to resize panels"
+        >
+          <div className="flex flex-col gap-1 pointer-events-none opacity-40 group-hover:opacity-100">
+            <span className="w-1.5 h-1.5 rounded-full bg-zinc-500 dark:bg-zinc-400"></span>
+            <span className="w-1.5 h-1.5 rounded-full bg-zinc-500 dark:bg-zinc-400"></span>
+            <span className="w-1.5 h-1.5 rounded-full bg-zinc-500 dark:bg-zinc-400"></span>
+          </div>
+        </div>
+
         {/* Output Panel */}
-        <div className="card dark-editor-card flex flex-col overflow-hidden">
-          <div className="border-b-2 border-zinc-200 p-2.5 px-4 dark-terminal-header flex items-center justify-between">
+        <div 
+          style={{ width: window.innerWidth >= 768 ? `${100 - splitWidth}%` : '100%' }}
+          className="card dark-editor-card flex flex-col overflow-hidden min-w-0"
+        >
+          <div className="border-b-2 border-zinc-200 dark:border-zinc-800 p-2.5 px-4 dark-terminal-header flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="hidden sm:flex items-center gap-1.5 mr-1">
                 <span className="window-dot window-dot-red"></span>

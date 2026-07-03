@@ -21,15 +21,53 @@ const SQL_DIALECTS = [
 ];
 
 export default function SqlCompare() {
-  const [dialect, setDialect] = useState<'sql' | 'mysql' | 'postgresql' | 'plsql' | 'tsql'>('sql');
-  const [ignoreWhitespace, setIgnoreWhitespace] = useState(true);
-  const [stripComments, setStripComments] = useState(false);
-  const [keywordCase, setKeywordCase] = useState<'upper' | 'lower' | 'preserve'>('upper');
-  const [dataTypeCase, setDataTypeCase] = useState<'upper' | 'lower' | 'preserve'>('upper');
-  const [functionCase, setFunctionCase] = useState<'upper' | 'lower' | 'preserve'>('upper');
-  const [logicalOperatorNewline, setLogicalOperatorNewline] = useState<'before' | 'after'>('before');
-  const [expressionWidth, setExpressionWidth] = useState<number>(50);
+  const [dialect, setDialect] = useState<'sql' | 'mysql' | 'postgresql' | 'plsql' | 'tsql'>(() => {
+    return (localStorage.getItem('kollidr-sql-dialect') as any) || 'sql';
+  });
+  const [ignoreWhitespace, setIgnoreWhitespace] = useState(() => {
+    return localStorage.getItem('kollidr-sql-ignore-ws') !== 'false';
+  });
+  const [stripComments, setStripComments] = useState(() => {
+    return localStorage.getItem('kollidr-sql-strip-comments') === 'true';
+  });
+  const [keywordCase, setKeywordCase] = useState<'upper' | 'lower' | 'preserve'>(() => {
+    return (localStorage.getItem('kollidr-sql-keyword-case') as any) || 'upper';
+  });
+  const [dataTypeCase, setDataTypeCase] = useState<'upper' | 'lower' | 'preserve'>(() => {
+    return (localStorage.getItem('kollidr-sql-datatype-case') as any) || 'upper';
+  });
+  const [functionCase, setFunctionCase] = useState<'upper' | 'lower' | 'preserve'>(() => {
+    return (localStorage.getItem('kollidr-sql-function-case') as any) || 'upper';
+  });
+  const [logicalOperatorNewline, setLogicalOperatorNewline] = useState<'before' | 'after'>(() => {
+    return (localStorage.getItem('kollidr-sql-logical-nl') as any) || 'before';
+  });
+  const [expressionWidth, setExpressionWidth] = useState<number>(() => {
+    const val = localStorage.getItem('kollidr-sql-expr-width');
+    return val ? parseInt(val) : 50;
+  });
   const [showAdvanced, setShowAdvanced] = useState(false);
+
+  // Sync settings back to localStorage
+  useEffect(() => {
+    localStorage.setItem('kollidr-sql-dialect', dialect);
+    localStorage.setItem('kollidr-sql-ignore-ws', String(ignoreWhitespace));
+    localStorage.setItem('kollidr-sql-strip-comments', String(stripComments));
+    localStorage.setItem('kollidr-sql-keyword-case', keywordCase);
+    localStorage.setItem('kollidr-sql-datatype-case', dataTypeCase);
+    localStorage.setItem('kollidr-sql-function-case', functionCase);
+    localStorage.setItem('kollidr-sql-logical-nl', logicalOperatorNewline);
+    localStorage.setItem('kollidr-sql-expr-width', String(expressionWidth));
+  }, [
+    dialect,
+    ignoreWhitespace,
+    stripComments,
+    keywordCase,
+    dataTypeCase,
+    functionCase,
+    logicalOperatorNewline,
+    expressionWidth
+  ]);
   
   const [originalSql, setOriginalSql] = useState(
     `-- Original SQL\nSELECT user_id, user_name, email_address\nFROM users u\nJOIN orders o ON u.user_id = o.customer_id\nWHERE o.order_date > '2023-01-01' -- filter by date\nAND o.status = 'completed';`

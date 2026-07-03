@@ -58,12 +58,22 @@ const LANGUAGES = [
 ];
 
 export default function CodeDiff() {
-  const [language, setLanguage] = useState('javascript');
-  const [splitView, setSplitView] = useState(true);
+  const [language, setLanguage] = useState(() => {
+    return localStorage.getItem('kollidr-diff-language') || 'javascript';
+  });
+  const [splitView, setSplitView] = useState(() => {
+    return localStorage.getItem('kollidr-diff-split') !== 'false';
+  });
   const [originalCode, setOriginalCode] = useState('// Paste original code here\nfunction calculateTotal(price, tax) {\n  var result = price + tax;\n  return result;\n}');
   const [modifiedCode, setModifiedCode] = useState('// Paste modified code here\nconst calculateTotal = (price, tax) => {\n  if (!price) return 0;\n  return price + tax;\n};');
   const [copiedOriginal, setCopiedOriginal] = useState(false);
   const [copiedModified, setCopiedModified] = useState(false);
+
+  // Sync settings back to localStorage
+  React.useEffect(() => {
+    localStorage.setItem('kollidr-diff-language', language);
+    localStorage.setItem('kollidr-diff-split', String(splitView));
+  }, [language, splitView]);
 
   const diffEditorRef = useRef<any>(null);
 
