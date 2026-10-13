@@ -3,6 +3,7 @@ import {
   GitCompare, 
   Database, 
   Sparkles, 
+  Wrench,
   Smile,
   Sun,
   Moon,
@@ -12,12 +13,13 @@ import {
 import CodeDiff from './components/CodeDiff';
 import SqlCompare from './components/SqlCompare';
 import Beautifier from './components/Beautifier';
+import DevToolbox from './components/DevToolbox';
 import DestressZone from './components/DestressZone';
 import { useTheme } from './context/ThemeContext';
 import './App.css';
 import { VERSION } from './version';
 
-type Tab = 'diff' | 'sql-compare' | 'beautifier' | 'destress';
+type Tab = 'diff' | 'sql-compare' | 'beautifier' | 'toolbox' | 'destress';
 
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>('diff');
@@ -25,15 +27,13 @@ function App() {
   const { theme, toggleTheme } = useTheme();
 
   const funStates = [
-    "Ready to Rumble",
-    "Ingesting Caffeine",
-    "Polishing Pixels",
-    "Analyzing Chakras",
-    "Compiling micro-bugs",
-    "Consulting StackOverflow",
-    "Reticulating Splines",
-    "Doing Black Magic",
-    "Wrangling brackets"
+    "Precision Engine Active",
+    "Brackets Aligned",
+    "Polishing AST Nodes",
+    "Diff Matrix Synced",
+    "Compiling Zero Bugs",
+    "Caffeine Infused",
+    "Quantum Beautified"
   ];
   const [funStatus, setFunStatus] = useState(funStates[0]);
 
@@ -51,6 +51,7 @@ function App() {
     { id: 'diff' as Tab, label: 'Code Compare', icon: GitCompare, description: 'Diff side-by-side or inline code changes' },
     { id: 'sql-compare' as Tab, label: 'SQL Compare', icon: Database, description: 'Compare SQL queries with formatting options' },
     { id: 'beautifier' as Tab, label: 'Beautifier', icon: Sparkles, description: 'Format and beautify JS, TS, HTML, CSS, JSON & SQL' },
+    { id: 'toolbox' as Tab, label: 'Dev Toolbox 🧰', icon: Wrench, description: 'JSON Studio, Base64, URL, Hashes, JWT & Scratchpad' },
     { id: 'destress' as Tab, label: 'Destress Zone 🎈', icon: Smile, description: 'Play stress-relieving mini-games and support the team' }
   ];
 
@@ -63,12 +64,11 @@ function App() {
         {/* Brand Header */}
         <div className="p-4 flex items-center justify-between border-b-2 border-zinc-200 dark:border-zinc-800 h-16 shrink-0 overflow-hidden">
           <div className="flex items-center gap-3 cursor-pointer group">
+            {/* Align Studio Precision Logo */}
             <div className="relative p-2 bg-zinc-950 dark:bg-zinc-800 rounded-xl text-white shadow-[2px_2px_0px_0px_#000000] dark:shadow-[2px_2px_0px_0px_#ff6b00] flex items-center justify-center overflow-hidden border-2 border-black dark:border-zinc-700 transition-transform duration-300 group-hover:scale-105">
-              {/* Hover Orange Glow */}
               <div className="absolute inset-0 bg-gradient-to-br from-orange-500 via-orange-600 to-amber-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              {/* Mascot SVG */}
               <svg 
-                className="relative z-10 w-5.5 h-5.5 text-white group-hover:animate-bounce-wink" 
+                className="relative z-10 w-5.5 h-5.5 text-white" 
                 viewBox="0 0 24 24" 
                 fill="none" 
                 stroke="currentColor" 
@@ -76,26 +76,30 @@ function App() {
                 strokeLinecap="round" 
                 strokeLinejoin="round"
               >
-                {/* Left Bracket */}
-                <path d="M8 3H5a2 2 0 0 0-2 2v3a2 2 0 0 1-2 2 2 2 0 0 1 2 2v3a2 2 0 0 0 2 2h3" />
-                {/* Right Bracket */}
-                <path d="M16 3h3a2 2 0 0 1 2 2v3a2 2 0 0 0 2 2 2 2 0 0 0-2 2v3a2 2 0 0 1-2 2h-3" />
-                {/* Eye Left */}
-                <circle cx="9.5" cy="11.5" r="1.2" fill="currentColor" />
-                {/* Eye Right (Winks on Hover) */}
-                <circle cx="14.5" cy="11.5" r="1.2" fill="currentColor" className="group-hover:hidden" />
-                <path d="M13.5 12.5a1.5 1.5 0 0 1 2-1" stroke="currentColor" strokeWidth="2" className="hidden group-hover:block" />
-                {/* Smile */}
-                <path d="M11 14.5a1.5 1.5 0 0 0 2 0" stroke="currentColor" strokeWidth="1.5" />
+                {/* Central vertical precision guide */}
+                <line x1="12" y1="2" x2="12" y2="22" stroke="#ff6b00" strokeWidth="2" strokeDasharray="2 2" />
+                {/* Horizontal alignment laser beam */}
+                <line x1="4" y1="12" x2="20" y2="12" stroke="#ff6b00" strokeWidth="2.5" />
+                {/* Left Alignment Bracket */}
+                <path d="M8 6H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h3" stroke="currentColor" strokeWidth="2.5" />
+                {/* Right Alignment Bracket */}
+                <path d="M16 6h3a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-3" stroke="currentColor" strokeWidth="2.5" />
+                {/* Precision center target core */}
+                <circle cx="12" cy="12" r="2" fill="#ff6b00" stroke="white" strokeWidth="1" />
               </svg>
             </div>
             {!sidebarCollapsed && (
               <div className="animate-fade-in">
-                <span className="font-extrabold text-sm tracking-tight text-zinc-950 dark:text-white block leading-none transition-colors duration-300 group-hover:text-[#ff6b00]">
-                  Kollidr
-                </span>
+                <div className="flex items-center gap-1.5">
+                  <span className="font-extrabold text-base tracking-tight text-zinc-950 dark:text-white block leading-none transition-colors duration-300 group-hover:text-[#ff6b00]">
+                    Align
+                  </span>
+                  <span className="text-[10px] font-extrabold text-[#ff6b00] font-mono px-1 py-0.2 rounded bg-orange-500/10 border border-orange-500/20 leading-none">
+                    Studio
+                  </span>
+                </div>
                 <span className="text-[8px] text-zinc-400 dark:text-zinc-500 font-bold tracking-widest uppercase mt-1 block">
-                  Premium Dev Suite
+                  Precision Code Suite
                 </span>
               </div>
             )}
@@ -103,7 +107,7 @@ function App() {
         </div>
 
         {/* Navigation stack */}
-        <nav className="flex-1 p-3 flex flex-col gap-2 overflow-y-auto min-h-0 mt-4">
+        <nav className="flex-1 p-3 flex flex-col gap-2 overflow-y-auto min-h-0 mt-3">
           {navigationItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -183,6 +187,9 @@ function App() {
             <div className={activeTab === 'beautifier' ? 'flex flex-col flex-1 min-h-0' : 'hidden'}>
               <Beautifier />
             </div>
+            <div className={activeTab === 'toolbox' ? 'flex flex-col flex-1 min-h-0' : 'hidden'}>
+              <DevToolbox />
+            </div>
             <div className={activeTab === 'destress' ? 'flex flex-col flex-1 min-h-0' : 'hidden'}>
               <DestressZone />
             </div>
@@ -192,7 +199,7 @@ function App() {
         {/* Modern Compact Footer */}
         <footer className="relative z-10 bg-white/90 dark:bg-zinc-900/90 border-t-2 border-zinc-200/80 dark:border-zinc-800 py-3.5 px-6 md:px-10 flex flex-col sm:flex-row items-center justify-between text-[11px] text-zinc-400 dark:text-zinc-500 shrink-0 backdrop-blur-md">
           <div>
-            © {new Date().getFullYear()} Kollidr Studio. All rights reserved.
+            © {new Date().getFullYear()} Align Studio. All rights reserved.
           </div>
           <div className="flex items-center gap-4 mt-2 sm:mt-0 font-medium">
             <span>Version {VERSION}</span>

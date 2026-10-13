@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { DiffEditor } from '@monaco-editor/react';
 import { format } from 'sql-formatter';
 import { 
@@ -9,9 +9,17 @@ import {
   Check, 
   Sparkles,
   EyeOff,
-  Sliders
+  Sliders,
+  Share2,
+  Download
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import { 
+  computeDiffStats, 
+  generateMarkdownDiff, 
+  downloadPatchFile, 
+  encodeDiffShare 
+} from '../utils/diffUtils';
 
 const SQL_DIALECTS = [
   { value: 'sql', label: 'Standard SQL' },
@@ -216,19 +224,45 @@ export default function SqlCompare() {
     }
   };
 
+  const [copiedShare, setCopiedShare] = useState(false);
+  const [copiedMarkdown, setCopiedMarkdown] = useState(false);
+
+  const diffStats = useMemo(() => {
+    return computeDiffStats(displayOriginal, displayModified);
+  }, [displayOriginal, displayModified]);
+
   const copyToClipboard = (text: string, setCopied: (v: boolean) => void) => {
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleShareLink = () => {
+    const encoded = encodeDiffShare(displayOriginal, displayModified, 'sql');
+    const url = `${window.location.origin}${window.location.pathname}#diff=${encoded}`;
+    navigator.clipboard.writeText(url);
+    setCopiedShare(true);
+    setTimeout(() => setCopiedShare(false), 2200);
+  };
+
+  const handleCopyMarkdown = () => {
+    const md = generateMarkdownDiff(displayOriginal, displayModified, 'queries.sql');
+    navigator.clipboard.writeText(md);
+    setCopiedMarkdown(true);
+    setTimeout(() => setCopiedMarkdown(false), 2200);
+  };
+
+  const handleDownloadPatch = () => {
+    downloadPatchFile(displayOriginal, displayModified, `align_sql_${Date.now()}.patch`);
+  };
+
   const isIdentical = displayOriginal.trim() === displayModified.trim();
 
   return (
-    <div className="animate-fade-in flex flex-col gap-4 flex-1 min-h-0">
+    <div className="animate-fade-in flex flex-col gap-3.5 flex-1 min-h-0">
       {/* SQL Compare Settings Toolbar */}
-      <div className="card flex flex-col overflow-hidden border-2 border-zinc-200 shrink-0">
-        <div className="p-4 flex flex-wrap items-center justify-between gap-4 border-b-2 border-zinc-200">
+      <div className="card flex flex-col overflow-hidden border-2 border-zinc-200 dark:border-zinc-800 shrink-0">
+        <div className="p-4 flex flex-wrap items-center justify-between gap-4 border-b-2 border-zinc-200 dark:border-zinc-800">
           <div className="flex flex-wrap items-center gap-6">
             <div className="flex flex-col gap-1">
               <span className="text-xs font-mono font-bold text-zinc-400 uppercase tracking-wider">SQL Dialect</span>
@@ -245,7 +279,7 @@ export default function SqlCompare() {
 
             {/* Core Rules Checkboxes */}
             <div className="flex items-center gap-5 pt-2 md:pt-0">
-              <label className="flex items-center gap-2.5 text-xs font-mono font-bold text-zinc-700 cursor-pointer select-none">
+              <label className="flex items-center gap-2.5 text-xs font-mono font-bold text-zinc-700 dark:text-zinc-300 cursor-pointer select-none">
                 <input 
                   type="checkbox" 
                   checked={stripComments}
@@ -258,7 +292,7 @@ export default function SqlCompare() {
                 </span>
               </label>
 
-              <label className="flex items-center gap-2.5 text-xs font-mono font-bold text-zinc-700 cursor-pointer select-none">
+              <label className="flex items-center gap-2.5 text-xs font-mono font-bold text-zinc-700 dark:text-zinc-300 cursor-pointer select-none">
                 <input 
                   type="checkbox" 
                   checked={ignoreWhitespace}
@@ -274,49 +308,107 @@ export default function SqlCompare() {
               <span className="text-xs font-mono font-bold text-zinc-400 uppercase tracking-wider">Preferences</span>
               <button 
                 onClick={() => setShowAdvanced(!showAdvanced)}
-                className={`btn-secondary py-1.5 px-3 flex items-center gap-2 btn-spring ${showAdvanced ? 'border-zinc-950 bg-zinc-950 text-white font-bold shadow-[2px_2px_0px_0px_#000000] hover:text-white' : ''}`}
+                className={`btn-secondary py-1.5 px-3 flex items-center gap-2 btn-spring ${showAdvanced ? 'border-zinc-950 dark:border-zinc-600 bg-zinc-950 dark:bg-zinc-800 text-white font-bold shadow-sm' : ''}`}
               >
                 <Sliders size={13} />
                 <span>Formatter Settings {showAdvanced ? '▲' : '▼'}</span>
               </button>
             </div>
-
-            {/* Match Status Badge */}
-            <div className="flex flex-col gap-1">
-              <span className="text-xs font-mono font-bold text-zinc-400 uppercase tracking-wider">Match Status</span>
-              <div className="flex items-center min-h-[30px]">
-                {isIdentical ? (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 text-green-700 text-[11px] font-bold border-2 border-green-300 rounded-lg animate-success-pop font-mono">
-                    <span>Perfect Match! No drama here. 🤝</span>
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-orange-50 text-[#ff6b00] text-[11px] font-bold border-2 border-[#ff6b00]/30 rounded-lg font-mono">
-                    <span>Divergence detected! Code has drifted. 🚨</span>
-                  </span>
-                )}
-              </div>
-            </div>
           </div>
 
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2.5 flex-wrap">
             <button 
               onClick={formatInputsInPlace} 
-              className="btn-primary py-1.5 px-4 btn-spring text-xs"
+              className="btn-primary py-1.5 px-3.5 btn-spring text-xs"
               title="Auto-format and clean original inputs"
             >
               <Sparkles size={13} />
               <span>Format & Align</span>
             </button>
+
+            <button 
+              onClick={handleShareLink} 
+              className="btn-secondary py-1.5 px-3 btn-spring flex items-center gap-1.5"
+              title="Create shareable compressed URL link"
+            >
+              {copiedShare ? <Check size={13} className="text-green-600" /> : <Share2 size={13} className="text-[#ff6b00]" />}
+              <span className="text-xs">{copiedShare ? 'Link Copied!' : 'Share Diff'}</span>
+            </button>
+
+            <button 
+              onClick={handleCopyMarkdown} 
+              className="btn-secondary py-1.5 px-3 btn-spring flex items-center gap-1.5"
+              title="Copy GitHub Markdown diff for PRs"
+            >
+              {copiedMarkdown ? <Check size={13} className="text-green-600" /> : <Copy size={13} />}
+              <span className="text-xs">{copiedMarkdown ? 'Copied MD!' : 'Copy for PR'}</span>
+            </button>
+
+            <button 
+              onClick={handleDownloadPatch} 
+              className="btn-secondary py-1.5 px-2.5 btn-spring"
+              title="Download unified .patch file"
+            >
+              <Download size={13} />
+            </button>
             
             <button onClick={handleSwap} className="btn-secondary py-1.5 px-3 btn-spring" title="Swap Panels">
               <ArrowLeftRight size={13} />
-              <span>Swap</span>
+              <span className="text-xs">Swap</span>
             </button>
             
-            <button onClick={handleClear} className="btn-secondary py-1.5 px-3 btn-spring text-red-600 hover:text-red-700 hover:border-red-300 hover:bg-red-50/20" title="Clear All">
+            <button onClick={handleClear} className="btn-secondary py-1.5 px-2.5 btn-spring text-red-600 hover:text-red-700 hover:border-red-300 hover:bg-red-50/20" title="Clear All">
               <Trash2 size={13} />
-              <span>Clear</span>
             </button>
+          </div>
+        </div>
+
+        {/* Diff Metrics HUD (Heads-Up Display) */}
+        <div className="p-2.5 px-4 flex flex-wrap items-center justify-between gap-3 text-xs font-mono shrink-0 bg-zinc-50/70 dark:bg-zinc-900/60 border-t border-zinc-200 dark:border-zinc-800">
+          <div className="flex items-center gap-4 flex-wrap">
+            {/* Similarity & Status Badge */}
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] uppercase font-bold text-zinc-400">Query Similarity:</span>
+              <div className="flex items-center gap-1.5 bg-white dark:bg-zinc-800 px-2 py-0.5 rounded border border-zinc-200 dark:border-zinc-700">
+                <span className="font-extrabold text-[#ff6b00]">{diffStats.similarity}%</span>
+                <div className="w-16 h-1.5 bg-zinc-200 dark:bg-zinc-700 rounded-full overflow-hidden">
+                  <div 
+                    className={`h-full ${diffStats.similarity === 100 ? 'bg-green-500' : 'bg-[#ff6b00]'}`}
+                    style={{ width: `${diffStats.similarity}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="h-4 w-[1px] bg-zinc-300 dark:bg-zinc-700 hidden sm:block" />
+
+            {/* Additions & Deletions Counter */}
+            <div className="flex items-center gap-3 font-bold">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20">
+                +{diffStats.additions} lines
+              </span>
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20">
+                -{diffStats.deletions} lines
+              </span>
+              <span className="text-zinc-500 dark:text-zinc-400 text-[11px] font-normal hidden md:inline">
+                ({diffStats.originalLines} orig / {diffStats.modifiedLines} mod)
+              </span>
+            </div>
+          </div>
+
+          {/* Match status indicator */}
+          <div className="flex items-center gap-1.5">
+            {isIdentical ? (
+              <span className="inline-flex items-center gap-1 text-green-600 dark:text-green-400 font-bold text-[11px]">
+                <Sparkles size={12} />
+                Queries Identical
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1 text-[#ff6b00] font-bold text-[11px]">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#ff6b00] animate-pulse" />
+                Query Differences Detected
+              </span>
+            )}
           </div>
         </div>
 

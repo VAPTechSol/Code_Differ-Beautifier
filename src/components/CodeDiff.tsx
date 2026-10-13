@@ -8,9 +8,21 @@ import {
   ArrowLeftRight, 
   Copy, 
   Check, 
-  FileText 
+  FileText,
+  Share2,
+  Download,
+  EyeOff,
+  WrapText,
+  Sparkles
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import { 
+  computeDiffStats, 
+  generateMarkdownDiff, 
+  downloadPatchFile, 
+  encodeDiffShare, 
+  decodeDiffShare 
+} from '../utils/diffUtils';
 
 const LANGUAGES = [
   // Popular first
@@ -61,23 +73,46 @@ const LANGUAGES = [
 export default function CodeDiff() {
   const { theme } = useTheme();
   const [language, setLanguage] = useState(() => {
-    return localStorage.getItem('kollidr-diff-language') || 'javascript';
+    return localStorage.getItem('align-diff-language') || 'javascript';
   });
   const [splitView, setSplitView] = useState(() => {
-    return localStorage.getItem('kollidr-diff-split') !== 'false';
+    return localStorage.getItem('align-diff-split') !== 'false';
   });
+  const [ignoreWhitespace, setIgnoreWhitespace] = useState(false);
+  const [wordWrap, setWordWrap] = useState(true);
+
   const [originalCode, setOriginalCode] = useState('// Paste original code here\nfunction calculateTotal(price, tax) {\n  var result = price + tax;\n  return result;\n}');
   const [modifiedCode, setModifiedCode] = useState('// Paste modified code here\nconst calculateTotal = (price, tax) => {\n  if (!price) return 0;\n  return price + tax;\n};');
   const [copiedOriginal, setCopiedOriginal] = useState(false);
   const [copiedModified, setCopiedModified] = useState(false);
+  const [copiedMarkdown, setCopiedMarkdown] = useState(false);
+  const [copiedShare, setCopiedShare] = useState(false);
 
   // Sync settings back to localStorage
   React.useEffect(() => {
-    localStorage.setItem('kollidr-diff-language', language);
-    localStorage.setItem('kollidr-diff-split', String(splitView));
+    localStorage.setItem('align-diff-language', language);
+    localStorage.setItem('align-diff-split', String(splitView));
   }, [language, splitView]);
 
+  // Decode shared link from URL hash on mount
+  React.useEffect(() => {
+    const shared = decodeDiffShare(window.location.hash);
+    if (shared) {
+      if (shared.original) setOriginalCode(shared.original);
+      if (shared.modified) setModifiedCode(shared.modified);
+      if (shared.lang) setLanguage(shared.lang);
+      if (diffEditorRef.current) {
+        diffEditorRef.current.getOriginalEditor().setValue(shared.original);
+        diffEditorRef.current.getModifiedEditor().setValue(shared.modified);
+      }
+    }
+  }, []);
+
   const diffEditorRef = useRef<any>(null);
+
+  const diffStats = React.useMemo(() => {
+    return computeDiffStats(originalCode, modifiedCode);
+  }, [originalCode, modifiedCode]);
 
   const handleEditorMount = (editor: any) => {
     diffEditorRef.current = editor;
@@ -184,13 +219,32 @@ export default function CodeDiff() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleCopyMarkdown = () => {
+    const md = generateMarkdownDiff(originalCode, modifiedCode, `diff_${language}`);
+    navigator.clipboard.writeText(md);
+    setCopiedMarkdown(true);
+    setTimeout(() => setCopiedMarkdown(false), 2200);
+  };
+
+  const handleShareLink = () => {
+    const encoded = encodeDiffShare(originalCode, modifiedCode, language);
+    const url = `${window.location.origin}${window.location.pathname}#diff=${encoded}`;
+    navigator.clipboard.writeText(url);
+    setCopiedShare(true);
+    setTimeout(() => setCopiedShare(false), 2200);
+  };
+
+  const handleDownloadPatch = () => {
+    downloadPatchFile(originalCode, modifiedCode, `align_diff_${Date.now()}.patch`);
+  };
+
   const isIdentical = originalCode.trim() === modifiedCode.trim();
 
   return (
-    <div className="animate-fade-in flex flex-col gap-4 flex-1 min-h-0">
+    <div className="animate-fade-in flex flex-col gap-3.5 flex-1 min-h-0">
       {/* Control bar */}
       <div className="card p-3 flex flex-wrap items-center justify-between gap-4 shrink-0">
-        <div className="flex items-center gap-5">
+        <div className="flex flex-wrap items-center gap-5">
           <div className="flex flex-col gap-1">
             <span className="text-xs font-mono font-bold text-zinc-400 uppercase tracking-wider">Language</span>
             <select 
@@ -206,13 +260,13 @@ export default function CodeDiff() {
 
           <div className="flex flex-col gap-1">
             <span className="text-xs font-mono font-bold text-zinc-400 uppercase tracking-wider">Layout</span>
-            <div className="flex bg-zinc-100/80 border-2 border-zinc-200 rounded-lg p-0.5">
+            <div className="flex bg-zinc-100/80 dark:bg-zinc-800/80 border-2 border-zinc-200 dark:border-zinc-700 rounded-lg p-0.5">
               <button 
                 onClick={() => setSplitView(true)}
                 className={`p-1 px-2.5 rounded-md transition-all btn-spring flex items-center justify-center gap-1.5 ${
                   splitView 
-                    ? 'bg-zinc-950 text-white font-bold border border-black shadow-[1px_1px_0px_0px_#000000]' 
-                    : 'text-zinc-500 hover:text-zinc-950 border border-transparent'
+                    ? 'bg-zinc-950 dark:bg-zinc-100 text-white dark:text-zinc-950 font-bold border border-black dark:border-zinc-200 shadow-sm' 
+                    : 'text-zinc-500 hover:text-zinc-950 dark:hover:text-white border border-transparent'
                 }`}
                 title="Split View"
               >
@@ -223,8 +277,8 @@ export default function CodeDiff() {
                 onClick={() => setSplitView(false)}
                 className={`p-1 px-2.5 rounded-md transition-all btn-spring flex items-center justify-center gap-1.5 ${
                   !splitView 
-                    ? 'bg-zinc-950 text-white font-bold border border-black shadow-[1px_1px_0px_0px_#000000]' 
-                    : 'text-zinc-500 hover:text-zinc-950 border border-transparent'
+                    ? 'bg-zinc-950 dark:bg-zinc-100 text-white dark:text-zinc-950 font-bold border border-black dark:border-zinc-200 shadow-sm' 
+                    : 'text-zinc-500 hover:text-zinc-950 dark:hover:text-white border border-transparent'
                 }`}
                 title="Unified / Inline View"
               >
@@ -234,33 +288,121 @@ export default function CodeDiff() {
             </div>
           </div>
 
-          {/* Playful Match Banner */}
-          <div className="flex flex-col gap-1">
-            <span className="text-xs font-mono font-bold text-zinc-400 uppercase tracking-wider">Match Status</span>
-            <div className="flex items-center min-h-[30px]">
-              {isIdentical ? (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 text-green-700 text-[11px] font-bold border-2 border-green-300 rounded-lg animate-success-pop font-mono">
-                  <span>Perfect Match! No drama here. 🤝</span>
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-orange-50 text-[#ff6b00] text-[11px] font-bold border-2 border-[#ff6b00]/30 rounded-lg font-mono">
-                  <span>Divergence detected! Code has drifted. 🚨</span>
-                </span>
-              )}
-            </div>
+          {/* Quick Toggles: Whitespace & Wrap */}
+          <div className="flex items-center gap-4 pt-2 md:pt-0">
+            <label className="flex items-center gap-2 text-xs font-mono font-bold text-zinc-700 dark:text-zinc-300 cursor-pointer select-none">
+              <input 
+                type="checkbox" 
+                checked={ignoreWhitespace} 
+                onChange={(e) => setIgnoreWhitespace(e.target.checked)}
+                className="rounded border-zinc-300 text-[#ff6b00] accent-[#ff6b00] cursor-pointer"
+              />
+              <span className="flex items-center gap-1">
+                <EyeOff size={12} className="text-zinc-400" />
+                Ignore WS
+              </span>
+            </label>
+
+            <label className="flex items-center gap-2 text-xs font-mono font-bold text-zinc-700 dark:text-zinc-300 cursor-pointer select-none">
+              <input 
+                type="checkbox" 
+                checked={wordWrap} 
+                onChange={(e) => setWordWrap(e.target.checked)}
+                className="rounded border-zinc-300 text-[#ff6b00] accent-[#ff6b00] cursor-pointer"
+              />
+              <span className="flex items-center gap-1">
+                <WrapText size={12} className="text-zinc-400" />
+                Word Wrap
+              </span>
+            </label>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        {/* Toolbar Utility Actions */}
+        <div className="flex items-center gap-2.5">
+          <button 
+            onClick={handleShareLink} 
+            className="btn-secondary py-1.5 px-3 btn-spring flex items-center gap-1.5"
+            title="Create shareable compressed URL link"
+          >
+            {copiedShare ? <Check size={13} className="text-green-600" /> : <Share2 size={13} className="text-[#ff6b00]" />}
+            <span className="text-xs">{copiedShare ? 'Link Copied!' : 'Share Diff'}</span>
+          </button>
+
+          <button 
+            onClick={handleCopyMarkdown} 
+            className="btn-secondary py-1.5 px-3 btn-spring flex items-center gap-1.5"
+            title="Copy GitHub Markdown diff for PRs"
+          >
+            {copiedMarkdown ? <Check size={13} className="text-green-600" /> : <Copy size={13} />}
+            <span className="text-xs">{copiedMarkdown ? 'Copied MD!' : 'Copy for PR'}</span>
+          </button>
+
+          <button 
+            onClick={handleDownloadPatch} 
+            className="btn-secondary py-1.5 px-2.5 btn-spring"
+            title="Download unified .patch file"
+          >
+            <Download size={13} />
+          </button>
+
           <button onClick={handleSwap} className="btn-secondary py-1.5 px-3 btn-spring" title="Swap Panels">
-            <ArrowLeftRight size={14} />
-            <span>Swap</span>
+            <ArrowLeftRight size={13} />
+            <span className="text-xs">Swap</span>
           </button>
           
-          <button onClick={handleClear} className="btn-secondary py-1.5 px-3 btn-spring text-red-600 hover:text-red-700 hover:border-red-300 hover:bg-red-50/20" title="Clear All">
-            <Trash2 size={14} />
-            <span>Clear</span>
+          <button onClick={handleClear} className="btn-secondary py-1.5 px-2.5 btn-spring text-red-600 hover:text-red-700 hover:border-red-300 hover:bg-red-50/20" title="Clear All">
+            <Trash2 size={13} />
           </button>
+        </div>
+      </div>
+
+      {/* Diff Metrics HUD (Heads-Up Display) */}
+      <div className="card p-2.5 px-4 flex flex-wrap items-center justify-between gap-3 text-xs font-mono shrink-0 bg-zinc-50/70 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800">
+        <div className="flex items-center gap-4 flex-wrap">
+          {/* Similarity & Status Badge */}
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] uppercase font-bold text-zinc-400">Similarity:</span>
+            <div className="flex items-center gap-1.5 bg-white dark:bg-zinc-800 px-2 py-0.5 rounded border border-zinc-200 dark:border-zinc-700">
+              <span className="font-extrabold text-[#ff6b00]">{diffStats.similarity}%</span>
+              <div className="w-16 h-1.5 bg-zinc-200 dark:bg-zinc-700 rounded-full overflow-hidden">
+                <div 
+                  className={`h-full ${diffStats.similarity === 100 ? 'bg-green-500' : 'bg-[#ff6b00]'}`}
+                  style={{ width: `${diffStats.similarity}%` }}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="h-4 w-[1px] bg-zinc-300 dark:bg-zinc-700 hidden sm:block" />
+
+          {/* Additions & Deletions Counter */}
+          <div className="flex items-center gap-3 font-bold">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20">
+              +{diffStats.additions} lines
+            </span>
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20">
+              -{diffStats.deletions} lines
+            </span>
+            <span className="text-zinc-500 dark:text-zinc-400 text-[11px] font-normal hidden md:inline">
+              ({diffStats.originalLines} orig / {diffStats.modifiedLines} mod)
+            </span>
+          </div>
+        </div>
+
+        {/* Match status indicator */}
+        <div className="flex items-center gap-1.5">
+          {isIdentical ? (
+            <span className="inline-flex items-center gap-1 text-green-600 dark:text-green-400 font-bold text-[11px]">
+              <Sparkles size={12} />
+              Files Identical
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1 text-[#ff6b00] font-bold text-[11px]">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#ff6b00] animate-pulse" />
+              Differences Detected
+            </span>
+          )}
         </div>
       </div>
 
@@ -350,12 +492,9 @@ export default function CodeDiff() {
             lineHeight: 18,
             fontFamily: "'JetBrains Mono', monospace",
             automaticLayout: true,
-            scrollbar: {
-              verticalScrollbarSize: 10,
-              horizontalScrollbarSize: 10
-            },
-            diffWordWrap: 'on',
-            wordWrap: 'on'
+            ignoreTrimWhitespace: ignoreWhitespace,
+            diffWordWrap: wordWrap ? 'on' : 'off',
+            wordWrap: wordWrap ? 'on' : 'off'
           }}
         />
       </div>
