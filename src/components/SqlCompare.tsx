@@ -14,6 +14,7 @@ import {
   Download
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import EditorSkeleton from './EditorSkeleton';
 import { 
   computeDiffStats, 
   generateMarkdownDiff, 
@@ -561,6 +562,7 @@ export default function SqlCompare() {
           original={displayOriginal}
           modified={displayModified}
           onMount={handleEditorMount}
+          loading={<EditorSkeleton label="Analyzing SQL Dialects & Schemas..." />}
           theme={theme === 'dark' ? 'vs-dark' : 'vs'}
           options={{
             originalEditable: true,

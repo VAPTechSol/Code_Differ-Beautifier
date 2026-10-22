@@ -11,6 +11,7 @@ import {
   Sliders
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import EditorSkeleton from './EditorSkeleton';
 
 const LANGUAGES = [
   // Popular first
@@ -650,6 +651,7 @@ export default function Beautifier() {
               language={language === 'typescript' ? 'typescript' : language === 'json' ? 'json' : language}
               value={inputCode}
               onMount={handleInputMount}
+              loading={<EditorSkeleton label="Initializing Formatter Input..." />}
               theme={theme === 'dark' ? 'vs-dark' : 'vs'}
               options={{
                 minimap: { enabled: false },
@@ -718,6 +720,7 @@ export default function Beautifier() {
               height="100%"
               language={language === 'typescript' ? 'typescript' : language === 'json' ? 'json' : language}
               value={outputCode}
+              loading={<EditorSkeleton label="Initializing Formatter Output..." />}
               theme={theme === 'dark' ? 'vs-dark' : 'vs'}
               options={{
                 readOnly: true,

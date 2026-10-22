@@ -16,6 +16,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import EditorSkeleton from './EditorSkeleton';
 import { 
   computeDiffStats, 
   generateMarkdownDiff, 
@@ -481,6 +482,7 @@ export default function CodeDiff() {
           original={originalCode}
           modified={modifiedCode}
           onMount={handleEditorMount}
+          loading={<EditorSkeleton label="Aligning Diff Syntax Trees..." />}
           theme={theme === 'dark' ? 'vs-dark' : 'vs'}
           options={{
             originalEditable: true,

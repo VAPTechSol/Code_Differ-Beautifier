@@ -5,65 +5,99 @@ import {
   Sparkles, 
   Wrench,
   Smile,
-  Sun,
-  Moon,
-  ChevronLeft,
-  ChevronRight
+  Sun, 
+  Moon, 
+  ChevronLeft, 
+  ChevronRight,
+  BookOpen,
+  Search,
+  Command
 } from 'lucide-react';
 import CodeDiff from './components/CodeDiff';
 import SqlCompare from './components/SqlCompare';
 import Beautifier from './components/Beautifier';
-import DevToolbox from './components/DevToolbox';
+import MarkdownStudio from './components/MarkdownStudio';
+import DevToolbox, { type ToolCategory } from './components/DevToolbox';
 import DestressZone from './components/DestressZone';
+import CommandPalette from './components/CommandPalette';
 import { useTheme } from './context/ThemeContext';
 import './App.css';
 import { VERSION } from './version';
 
-type Tab = 'diff' | 'sql-compare' | 'beautifier' | 'toolbox' | 'destress';
+type Tab = 'diff' | 'sql-compare' | 'beautifier' | 'markdown' | 'toolbox' | 'destress';
+
+const FUN_STATES = [
+  "Precision Engine Active",
+  "Brackets Aligned",
+  "Polishing AST Nodes",
+  "Diff Matrix Synced",
+  "Compiling Zero Bugs",
+  "Caffeine Infused",
+  "Quantum Beautified"
+];
 
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>('diff');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+  const [toolboxInitialTool, setToolboxInitialTool] = useState<ToolCategory>('json');
   const { theme, toggleTheme } = useTheme();
-
-  const funStates = [
-    "Precision Engine Active",
-    "Brackets Aligned",
-    "Polishing AST Nodes",
-    "Diff Matrix Synced",
-    "Compiling Zero Bugs",
-    "Caffeine Infused",
-    "Quantum Beautified"
-  ];
-  const [funStatus, setFunStatus] = useState(funStates[0]);
+  const [funStatus, setFunStatus] = useState(FUN_STATES[0]);
 
   useEffect(() => {
     const interval = setInterval(() => {
       setFunStatus(prev => {
-        const idx = funStates.indexOf(prev);
-        return funStates[(idx + 1) % funStates.length];
+        const idx = FUN_STATES.indexOf(prev);
+        return FUN_STATES[(idx + 1) % FUN_STATES.length];
       });
     }, 5000);
     return () => clearInterval(interval);
+  }, []);
+
+  // Keyboard shortcut Ctrl+K / Cmd+K for Command Palette
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsCommandPaletteOpen(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
   }, []);
 
   const navigationItems = [
     { id: 'diff' as Tab, label: 'Code Compare', icon: GitCompare, description: 'Diff side-by-side or inline code changes' },
     { id: 'sql-compare' as Tab, label: 'SQL Compare', icon: Database, description: 'Compare SQL queries with formatting options' },
     { id: 'beautifier' as Tab, label: 'Beautifier', icon: Sparkles, description: 'Format and beautify JS, TS, HTML, CSS, JSON & SQL' },
-    { id: 'toolbox' as Tab, label: 'Dev Toolbox 🧰', icon: Wrench, description: 'JSON Studio, Base64, URL, Hashes, JWT & Scratchpad' },
+    { id: 'markdown' as Tab, label: 'Markdown Studio 📝', icon: BookOpen, description: 'Live dual-pane GitHub markdown authoring & HTML export' },
+    { id: 'toolbox' as Tab, label: 'Dev Toolbox 🧰', icon: Wrench, description: 'Regex Lab, Text Tools, JSON, Base64, Hashes & JWT' },
     { id: 'destress' as Tab, label: 'Destress Zone 🎈', icon: Smile, description: 'Play stress-relieving mini-games and support the team' }
   ];
+
+  const handleNavigateToolbox = (toolId: string) => {
+    setToolboxInitialTool(toolId as ToolCategory);
+  };
 
   return (
     <div className="flex flex-row h-screen w-screen overflow-hidden bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-sans">
       
+      {/* Command Palette Modal */}
+      <CommandPalette
+        isOpen={isCommandPaletteOpen}
+        onClose={() => setIsCommandPaletteOpen(false)}
+        onNavigateTab={(tab) => setActiveTab(tab as Tab)}
+        onNavigateToolbox={handleNavigateToolbox}
+        onToggleTheme={toggleTheme}
+        currentTheme={theme}
+      />
+
       {/* Premium Collapsible Left Sidebar */}
       <aside className={`relative z-20 h-full bg-zinc-50 dark:bg-zinc-900 border-r-2 border-zinc-200 dark:border-zinc-800 flex flex-col justify-between transition-all duration-300 ease-in-out select-none ${sidebarCollapsed ? 'w-18' : 'w-64'}`}>
         
         {/* Brand Header */}
         <div className="p-4 flex items-center justify-between border-b-2 border-zinc-200 dark:border-zinc-800 h-16 shrink-0 overflow-hidden">
-          <div className="flex items-center gap-3 cursor-pointer group">
+          <div className="flex items-center gap-3 cursor-pointer group" onClick={() => setActiveTab('diff')}>
             {/* Align Studio Precision Logo */}
             <div className="relative p-2 bg-zinc-950 dark:bg-zinc-800 rounded-xl text-white shadow-[2px_2px_0px_0px_#000000] dark:shadow-[2px_2px_0px_0px_#ff6b00] flex items-center justify-center overflow-hidden border-2 border-black dark:border-zinc-700 transition-transform duration-300 group-hover:scale-105">
               <div className="absolute inset-0 bg-gradient-to-br from-orange-500 via-orange-600 to-amber-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -106,8 +140,29 @@ function App() {
           </div>
         </div>
 
+        {/* Quick Search / Command Palette Pill */}
+        <div className="px-3 pt-3">
+          <button
+            onClick={() => setIsCommandPaletteOpen(true)}
+            className={`w-full flex items-center justify-between p-2 rounded-xl text-xs font-mono font-bold bg-white dark:bg-zinc-800 border-2 border-zinc-200 dark:border-zinc-700 hover:border-[#ff6b00] dark:hover:border-[#ff6b00] text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-all btn-spring shadow-xs ${
+              sidebarCollapsed ? 'justify-center px-0' : 'px-3'
+            }`}
+            title="Search tools or commands (Ctrl + K)"
+          >
+            <div className="flex items-center gap-2">
+              <Search size={14} className="text-[#ff6b00]" />
+              {!sidebarCollapsed && <span>Search Tools...</span>}
+            </div>
+            {!sidebarCollapsed && (
+              <kbd className="text-[9px] px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 text-zinc-400">
+                ⌘K
+              </kbd>
+            )}
+          </button>
+        </div>
+
         {/* Navigation stack */}
-        <nav className="flex-1 p-3 flex flex-col gap-2 overflow-y-auto min-h-0 mt-3">
+        <nav className="flex-1 p-3 flex flex-col gap-2 overflow-y-auto min-h-0 mt-1">
           {navigationItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -187,8 +242,11 @@ function App() {
             <div className={activeTab === 'beautifier' ? 'flex flex-col flex-1 min-h-0' : 'hidden'}>
               <Beautifier />
             </div>
+            <div className={activeTab === 'markdown' ? 'flex flex-col flex-1 min-h-0' : 'hidden'}>
+              <MarkdownStudio />
+            </div>
             <div className={activeTab === 'toolbox' ? 'flex flex-col flex-1 min-h-0' : 'hidden'}>
-              <DevToolbox />
+              <DevToolbox initialTool={toolboxInitialTool} />
             </div>
             <div className={activeTab === 'destress' ? 'flex flex-col flex-1 min-h-0' : 'hidden'}>
               <DestressZone />
@@ -198,8 +256,16 @@ function App() {
 
         {/* Modern Compact Footer */}
         <footer className="relative z-10 bg-white/90 dark:bg-zinc-900/90 border-t-2 border-zinc-200/80 dark:border-zinc-800 py-3.5 px-6 md:px-10 flex flex-col sm:flex-row items-center justify-between text-[11px] text-zinc-400 dark:text-zinc-500 shrink-0 backdrop-blur-md">
-          <div>
-            © {new Date().getFullYear()} Align Studio. All rights reserved.
+          <div className="flex items-center gap-3">
+            <span>© {new Date().getFullYear()} Align Studio. All rights reserved.</span>
+            <span className="hidden sm:inline text-zinc-300 dark:text-zinc-700">•</span>
+            <button
+              onClick={() => setIsCommandPaletteOpen(true)}
+              className="hidden sm:flex items-center gap-1 hover:text-[#ff6b00] transition-colors"
+            >
+              <Command size={11} />
+              <span>Press <kbd className="px-1 bg-zinc-100 dark:bg-zinc-800 rounded font-mono text-[10px]">Ctrl+K</kbd> anywhere</span>
+            </button>
           </div>
           <div className="flex items-center gap-4 mt-2 sm:mt-0 font-medium">
             <span>Version {VERSION}</span>

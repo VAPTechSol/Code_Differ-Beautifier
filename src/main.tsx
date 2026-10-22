@@ -10,4 +10,17 @@ createRoot(document.getElementById('root')!).render(
       <App />
     </ThemeProvider>
   </StrictMode>,
-)
+);
+
+// Gracefully dismiss the initial loading splash screen once React mounts
+requestAnimationFrame(() => {
+  setTimeout(() => {
+    const splashLoader = document.getElementById('app-splash-loader');
+    if (splashLoader) {
+      splashLoader.classList.add('loaded');
+      setTimeout(() => {
+        splashLoader.remove();
+      }, 400);
+    }
+  }, 250);
+});
