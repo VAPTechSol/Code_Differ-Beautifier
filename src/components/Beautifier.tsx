@@ -662,7 +662,8 @@ export default function Beautifier() {
                 scrollBeyondLastLine: false,
                 wordWrap: 'on',
                 tabSize: indentSize,
-                insertSpaces: !indentWithTabs
+                insertSpaces: !indentWithTabs,
+                padding: { top: 8, bottom: 8 }
               }}
             />
           </div>
@@ -731,7 +732,8 @@ export default function Beautifier() {
                 automaticLayout: true,
                 scrollBeyondLastLine: false,
                 wordWrap: 'on',
-                tabSize: indentSize
+                tabSize: indentSize,
+                padding: { top: 8, bottom: 8 }
               }}
             />
           </div>

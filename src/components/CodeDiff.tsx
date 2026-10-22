@@ -475,7 +475,7 @@ export default function CodeDiff() {
       </div>
 
       {/* Editor Container */}
-      <div className="card dark-editor-card overflow-hidden flex-1 min-h-0 border-t-0 rounded-t-none">
+      <div className="card dark-editor-card flex-1 min-h-0 border-t-0 rounded-t-none relative">
         <DiffEditor
           height="100%"
           language={language}
@@ -496,7 +496,8 @@ export default function CodeDiff() {
             automaticLayout: true,
             ignoreTrimWhitespace: ignoreWhitespace,
             diffWordWrap: wordWrap ? 'on' : 'off',
-            wordWrap: wordWrap ? 'on' : 'off'
+            wordWrap: wordWrap ? 'on' : 'off',
+            padding: { top: 8, bottom: 8 }
           }}
         />
       </div>

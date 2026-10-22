@@ -133,8 +133,6 @@ select:focus {
 
 /* Monaco editor theme override integration */
 .monaco-editor {
-  padding-top: 12px;
-  padding-bottom: 12px;
   background-color: var(--bg-card) !important;
 }
 
@@ -145,6 +143,51 @@ select:focus {
 
 .monaco-editor-background {
   background-color: var(--bg-card) !important;
+}
+
+/* Monaco Hover & Tooltips Fix */
+.monaco-hover,
+.monaco-editor .monaco-hover,
+.workbench-hover {
+  z-index: 10000 !important;
+  background-color: var(--bg-card) !important;
+  color: var(--text-main) !important;
+  border: 1px solid var(--border-card) !important;
+  border-radius: 6px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45) !important;
+  font-family: 'JetBrains Mono', monospace !important;
+  font-size: 11px !important;
+  line-height: 1.4 !important;
+}
+
+.monaco-hover .hover-contents,
+.monaco-editor .monaco-hover .hover-contents {
+  padding: 4px 8px !important;
+}
+
+/* Monaco Find & Replace Widget Styling */
+.monaco-editor .find-widget {
+  top: 8px !important;
+  right: 20px !important;
+  border-radius: 8px !important;
+  background-color: var(--bg-card) !important;
+  border: 1px solid var(--border-card) !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--border-card) !important;
+  z-index: 45 !important;
+}
+
+.monaco-editor .find-widget .monaco-inputbox {
+  border-radius: 4px !important;
+  border: 1px solid var(--border-card) !important;
+  background-color: var(--bg-terminal) !important;
+}
+
+.monaco-editor .find-widget .button {
+  border-radius: 4px !important;
+}
+
+.monaco-editor .find-widget .button:hover {
+  background-color: var(--bg-terminal) !important;
 }
 
 /* Custom Tailwind utility classes defined using Tailwind @utility directive */
@@ -271,11 +314,6 @@ select:focus {
   box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 0.08);
   border-radius: 8px;
   transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-
-  &:hover {
-    border-color: #ff6b00;
-    box-shadow: 4px 4px 0px 0px rgba(255, 107, 0, 0.12);
-  }
 }
 
 @utility window-dot {

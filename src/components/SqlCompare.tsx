@@ -555,7 +555,7 @@ export default function SqlCompare() {
       </div>
 
       {/* Editor Container */}
-      <div className="card dark-editor-card overflow-hidden flex-1 min-h-0 border-t-0 rounded-t-none">
+      <div className="card dark-editor-card flex-1 min-h-0 border-t-0 rounded-t-none relative">
         <DiffEditor
           height="100%"
           language="sql"
@@ -580,7 +580,8 @@ export default function SqlCompare() {
               horizontalScrollbarSize: 10
             },
             diffWordWrap: 'on',
-            wordWrap: 'on'
+            wordWrap: 'on',
+            padding: { top: 8, bottom: 8 }
           }}
         />
       </div>
