@@ -11,7 +11,8 @@ import {
   ChevronRight,
   BookOpen,
   Search,
-  Command
+  Command,
+  Lightbulb
 } from 'lucide-react';
 import CodeDiff from './components/CodeDiff';
 import SqlCompare from './components/SqlCompare';
@@ -19,12 +20,13 @@ import Beautifier from './components/Beautifier';
 import MarkdownStudio from './components/MarkdownStudio';
 import DevToolbox, { type ToolCategory } from './components/DevToolbox';
 import DestressZone from './components/DestressZone';
+import FeatureRequest from './components/FeatureRequest';
 import CommandPalette from './components/CommandPalette';
 import { useTheme } from './context/ThemeContext';
 import './App.css';
 import { VERSION } from './version';
 
-type Tab = 'diff' | 'sql-compare' | 'beautifier' | 'markdown' | 'toolbox' | 'destress';
+type Tab = 'diff' | 'sql-compare' | 'beautifier' | 'markdown' | 'toolbox' | 'destress' | 'feature-request';
 
 const FUN_STATES = [
   "Precision Engine Active",
@@ -72,7 +74,8 @@ function App() {
     { id: 'beautifier' as Tab, label: 'Beautifier', icon: Sparkles, description: 'Format and beautify JS, TS, HTML, CSS, JSON & SQL' },
     { id: 'markdown' as Tab, label: 'Markdown Studio 📝', icon: BookOpen, description: 'Live dual-pane GitHub markdown authoring & HTML export' },
     { id: 'toolbox' as Tab, label: 'Dev Toolbox 🧰', icon: Wrench, description: 'Gzip Encrypt, Regex Lab, Text Tools, JSON, Base64 & JWT' },
-    { id: 'destress' as Tab, label: 'Destress Zone 🎈', icon: Smile, description: 'Play stress-relieving mini-games and support the team' }
+    { id: 'destress' as Tab, label: 'Destress Zone 🎈', icon: Smile, description: 'Play stress-relieving mini-games and support the team' },
+    { id: 'feature-request' as Tab, label: 'Feature Request 💡', icon: Lightbulb, description: 'Request new features or submit suggestions to info@vaptechsol.com' }
   ];
 
   const handleNavigateToolbox = (toolId: string) => {
@@ -251,13 +254,24 @@ function App() {
             <div className={activeTab === 'destress' ? 'flex flex-col flex-1 min-h-0' : 'hidden'}>
               <DestressZone />
             </div>
+            <div className={activeTab === 'feature-request' ? 'flex flex-col flex-1 min-h-0' : 'hidden'}>
+              <FeatureRequest />
+            </div>
           </div>
         </main>
 
         {/* Modern Compact Footer */}
         <footer className="relative z-10 bg-white/90 dark:bg-zinc-900/90 border-t-2 border-zinc-200/80 dark:border-zinc-800 py-3.5 px-6 md:px-10 flex flex-col sm:flex-row items-center justify-between text-[11px] text-zinc-400 dark:text-zinc-500 shrink-0 backdrop-blur-md">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             <span>© {new Date().getFullYear()} Align Studio. All rights reserved.</span>
+            <span className="hidden sm:inline text-zinc-300 dark:text-zinc-700">•</span>
+            <button
+              onClick={() => setActiveTab('feature-request')}
+              className="text-[#ff6b00] hover:underline font-bold transition-colors cursor-pointer flex items-center gap-1"
+            >
+              <Lightbulb size={12} />
+              <span>Request Feature / Suggestion</span>
+            </button>
             <span className="hidden sm:inline text-zinc-300 dark:text-zinc-700">•</span>
             <button
               onClick={() => setIsCommandPaletteOpen(true)}
@@ -267,10 +281,29 @@ function App() {
               <span>Press <kbd className="px-1 bg-zinc-100 dark:bg-zinc-800 rounded font-mono text-[10px]">Ctrl+K</kbd> anywhere</span>
             </button>
           </div>
-          <div className="flex items-center gap-4 mt-2 sm:mt-0 font-medium">
+          <div className="flex items-center gap-4 mt-2 sm:mt-0 font-medium flex-wrap">
             <span>Version {VERSION}</span>
             <span className="text-zinc-300 dark:text-zinc-700">|</span>
-            <span>Made with ❤️ by <a href="mailto:info@vaptechsol.com" className="underline hover:text-zinc-800 dark:hover:text-zinc-300 transition-colors">VAPTechSol</a></span>
+            <span>
+              Made with ❤️ by{' '}
+              <a 
+                href="https://www.vaptechsol.com" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="underline hover:text-zinc-800 dark:hover:text-zinc-200 text-[#ff6b00] font-bold transition-colors"
+                title="Visit VAPTechSol"
+              >
+                VAPTechSol
+              </a>{' '}
+              (<a 
+                href="https://www.vaptechsol.com" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="hover:underline text-zinc-400 dark:text-zinc-500 hover:text-[#ff6b00]"
+              >
+                www.vaptechsol.com
+              </a>)
+            </span>
           </div>
         </footer>
 

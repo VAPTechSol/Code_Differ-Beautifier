@@ -17,7 +17,8 @@ import {
   FileJson,
   Regex,
   ListOrdered,
-  FileArchive
+  FileArchive,
+  Lightbulb
 } from 'lucide-react';
 
 export interface CommandItem {
@@ -133,6 +134,15 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       icon: Smile,
       action: () => { onNavigateTab('destress'); onClose(); },
       keywords: ['games', 'destress', 'fun', 'break', 'coffee', 'balloon']
+    },
+    {
+      id: 'tab-feedback',
+      title: 'Request Feature / Suggestion',
+      subtitle: 'Send feedback and new ideas directly to info@vaptechsol.com',
+      category: 'Tools',
+      icon: Lightbulb,
+      action: () => { onNavigateTab('feature-request'); onClose(); },
+      keywords: ['request', 'feature', 'suggest', 'suggestion', 'feedback', 'mail', 'email', 'vaptechsol']
     },
 
     // Dev Toolbox Sub-tools
