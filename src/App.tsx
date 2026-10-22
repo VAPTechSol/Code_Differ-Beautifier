@@ -71,7 +71,7 @@ function App() {
     { id: 'sql-compare' as Tab, label: 'SQL Compare', icon: Database, description: 'Compare SQL queries with formatting options' },
     { id: 'beautifier' as Tab, label: 'Beautifier', icon: Sparkles, description: 'Format and beautify JS, TS, HTML, CSS, JSON & SQL' },
     { id: 'markdown' as Tab, label: 'Markdown Studio 📝', icon: BookOpen, description: 'Live dual-pane GitHub markdown authoring & HTML export' },
-    { id: 'toolbox' as Tab, label: 'Dev Toolbox 🧰', icon: Wrench, description: 'Regex Lab, Text Tools, JSON, Base64, Hashes & JWT' },
+    { id: 'toolbox' as Tab, label: 'Dev Toolbox 🧰', icon: Wrench, description: 'Gzip Encrypt, Regex Lab, Text Tools, JSON, Base64 & JWT' },
     { id: 'destress' as Tab, label: 'Destress Zone 🎈', icon: Smile, description: 'Play stress-relieving mini-games and support the team' }
   ];
 

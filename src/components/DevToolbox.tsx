@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Wrench, 
   Copy, 
@@ -13,18 +13,23 @@ import {
   KeyRound, 
   FileEdit,
   Download,
+  Upload,
   Regex as RegexIcon,
   ListOrdered,
   Sparkles,
   ArrowDownAZ,
   ArrowUpAZ,
-  HelpCircle
+  HelpCircle,
+  FileArchive,
+  Archive,
+  Minimize2
 } from 'lucide-react';
 
 export type ToolCategory = 
   | 'json' 
   | 'regex'
   | 'text-tools'
+  | 'gzip'
   | 'base64' 
   | 'url' 
   | 'case' 
@@ -86,11 +91,53 @@ export default function DevToolbox({ initialTool = 'json' }: DevToolboxProps) {
   const [textPrefix, setTextPrefix] = useState('');
   const [textSuffix, setTextSuffix] = useState('');
 
+  // Gzip / Compression States
+  const [gzipAlgorithm, setGzipAlgorithm] = useState<'gzip' | 'deflate'>('gzip');
+  const [gzipFormat, setGzipFormat] = useState<'base64' | 'hex'>('base64');
+  const [gzipRawBytes, setGzipRawBytes] = useState<Uint8Array | null>(null);
+  const [gzipStats, setGzipStats] = useState<{ originalSize: number; compressedSize: number; ratio: number } | null>(null);
+
   const copyToClipboard = (text: string) => {
     if (!text) return;
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  // Helper: Uint8Array to Base64
+  const bytesToBase64 = (bytes: Uint8Array): string => {
+    let binary = '';
+    const len = bytes.byteLength;
+    for (let i = 0; i < len; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary);
+  };
+
+  // Helper: Base64 to Uint8Array
+  const base64ToBytes = (base64: string): Uint8Array => {
+    const cleaned = base64.trim().replace(/\s+/g, '');
+    const binary = atob(cleaned);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+    return bytes;
+  };
+
+  // Helper: Uint8Array to Hex
+  const bytesToHex = (bytes: Uint8Array): string => {
+    return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join(' ');
+  };
+
+  // Helper: Hex to Uint8Array
+  const hexToBytes = (hex: string): Uint8Array => {
+    const clean = hex.replace(/[^0-9a-fA-F]/g, '');
+    const bytes = new Uint8Array(clean.length / 2);
+    for (let i = 0; i < clean.length; i += 2) {
+      bytes[i / 2] = parseInt(clean.substring(i, i + 2), 16);
+    }
+    return bytes;
   };
 
   // 1. JSON Operations
@@ -220,7 +267,98 @@ export default function DevToolbox({ initialTool = 'json' }: DevToolboxProps) {
     }
   };
 
-  // 7. Regex Lab Calculations
+  // 7. Gzip Compression (Encrypt) & Decompression (Decrypt)
+  const handleGzipCompress = async () => {
+    if (!inputVal) {
+      setStatusMsg('Please enter input text to compress ❌');
+      return;
+    }
+    try {
+      const rawData = new TextEncoder().encode(inputVal);
+      const stream = new Blob([rawData as unknown as BlobPart]).stream().pipeThrough(new CompressionStream(gzipAlgorithm));
+      const compressedBuffer = await new Response(stream).arrayBuffer();
+      const compressedBytes = new Uint8Array(compressedBuffer);
+      setGzipRawBytes(compressedBytes);
+
+      const formatted = gzipFormat === 'base64' ? bytesToBase64(compressedBytes) : bytesToHex(compressedBytes);
+      setOutputVal(formatted);
+
+      const originalSize = rawData.length;
+      const compressedSize = compressedBytes.length;
+      const ratio = originalSize > 0 ? ((1 - (compressedSize / originalSize)) * 100) : 0;
+      setGzipStats({ originalSize, compressedSize, ratio });
+      setStatusMsg(`${gzipAlgorithm.toUpperCase()} Encrypted/Compressed (${ratio >= 0 ? `${ratio.toFixed(1)}% smaller` : 'expanded'}) ✨`);
+    } catch (e: any) {
+      setOutputVal(`Compression Error: ${e.message}`);
+      setStatusMsg('Compression failed ❌');
+    }
+  };
+
+  const handleGzipDecompress = async () => {
+    if (!inputVal.trim()) {
+      setStatusMsg('Please provide Base64 or Hex to decompress ❌');
+      return;
+    }
+    try {
+      let bytes: Uint8Array;
+      if (gzipFormat === 'hex' || (/^[0-9a-fA-F\s]+$/.test(inputVal.trim()) && !inputVal.includes('='))) {
+        bytes = hexToBytes(inputVal);
+      } else {
+        bytes = base64ToBytes(inputVal);
+      }
+      setGzipRawBytes(bytes);
+      const stream = new Blob([bytes as unknown as BlobPart]).stream().pipeThrough(new DecompressionStream(gzipAlgorithm));
+      const decompressedBuffer = await new Response(stream).arrayBuffer();
+      const decoded = new TextDecoder().decode(decompressedBuffer);
+      setOutputVal(decoded);
+
+      const compressedSize = bytes.length;
+      const originalSize = new TextEncoder().encode(decoded).length;
+      const ratio = originalSize > 0 ? ((1 - (compressedSize / originalSize)) * 100) : 0;
+      setGzipStats({ originalSize, compressedSize, ratio });
+      setStatusMsg(`${gzipAlgorithm.toUpperCase()} Decrypted/Decompressed successfully ✨`);
+    } catch (e: any) {
+      setOutputVal(`Decompression Error: ${e.message}. Verify that input is valid ${gzipAlgorithm.toUpperCase()} (${gzipFormat.toUpperCase()}).`);
+      setStatusMsg('Decompression failed ❌');
+    }
+  };
+
+  const handleGzipFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const buffer = await file.arrayBuffer();
+      const bytes = new Uint8Array(buffer);
+      setGzipRawBytes(bytes);
+
+      const stream = new Blob([bytes as unknown as BlobPart]).stream().pipeThrough(new DecompressionStream(gzipAlgorithm));
+      const decompressedBuffer = await new Response(stream).arrayBuffer();
+      const text = new TextDecoder().decode(decompressedBuffer);
+
+      setInputVal(bytesToBase64(bytes));
+      setOutputVal(text);
+      const compressedSize = bytes.length;
+      const originalSize = new TextEncoder().encode(text).length;
+      setGzipStats({ originalSize, compressedSize, ratio: ((1 - (compressedSize / originalSize)) * 100) });
+      setStatusMsg(`Extracted ${file.name} (${bytes.length} B compressed -> ${originalSize} B raw) ✨`);
+    } catch (err: any) {
+      setOutputVal(`File Decompression Error: ${err.message}`);
+      setStatusMsg('File decompression failed ❌');
+    }
+  };
+
+  const handleDownloadGz = () => {
+    if (!gzipRawBytes) return;
+    const blob = new Blob([gzipRawBytes as unknown as BlobPart], { type: 'application/gzip' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `payload_${Date.now()}.${gzipAlgorithm === 'gzip' ? 'gz' : 'deflate'}`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // 8. Regex Lab Calculations
   const regexResults = useMemo(() => {
     if (!regexPattern) return { valid: false, error: 'Pattern is empty', matches: [] };
 
@@ -265,7 +403,7 @@ export default function DevToolbox({ initialTool = 'json' }: DevToolboxProps) {
     }
   }, [regexPattern, regexFlags, regexTestStr]);
 
-  // 8. Text & List Tools Operations
+  // 9. Text & List Tools Operations
   const textStats = useMemo(() => {
     const text = textToolInput;
     const lines = text ? text.split('\n') : [];
@@ -363,6 +501,7 @@ export default function DevToolbox({ initialTool = 'json' }: DevToolboxProps) {
     { id: 'json' as ToolCategory, label: 'JSON Studio', icon: FileJson },
     { id: 'regex' as ToolCategory, label: 'Regex Lab', icon: RegexIcon },
     { id: 'text-tools' as ToolCategory, label: 'Text & Lists', icon: ListOrdered },
+    { id: 'gzip' as ToolCategory, label: 'Gzip Encrypt', icon: FileArchive },
     { id: 'base64' as ToolCategory, label: 'Base64', icon: Binary },
     { id: 'url' as ToolCategory, label: 'URL Encode', icon: Link2 },
     { id: 'case' as ToolCategory, label: 'Case Convert', icon: Type },
@@ -729,7 +868,7 @@ export default function DevToolbox({ initialTool = 'json' }: DevToolboxProps) {
           />
         </div>
       ) : (
-        /* Standard 2-Pane Transform View (JSON, Base64, URL, Case, Hash, JWT) */
+        /* Standard 2-Pane Transform View (JSON, Gzip, Base64, URL, Case, Hash, JWT) */
         <div className="flex flex-col gap-3 flex-1 min-h-0 overflow-hidden">
           {/* Action Header for current tool */}
           <div className="card p-3 px-4 flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-zinc-900 border-2 border-zinc-200 dark:border-zinc-800 shrink-0">
@@ -738,6 +877,61 @@ export default function DevToolbox({ initialTool = 'json' }: DevToolboxProps) {
                 <>
                   <button onClick={formatJson} className="btn-primary py-1 px-3 text-xs">Format JSON</button>
                   <button onClick={minifyJson} className="btn-secondary py-1 px-3 text-xs">Minify JSON</button>
+                </>
+              )}
+              {activeTool === 'gzip' && (
+                <>
+                  <button onClick={handleGzipCompress} className="btn-primary py-1 px-3 text-xs flex items-center gap-1.5" title="Compress/Encrypt text to Gzip">
+                    <Archive size={13} />
+                    <span>Compress / Encrypt</span>
+                  </button>
+                  <button onClick={handleGzipDecompress} className="btn-secondary py-1 px-3 text-xs flex items-center gap-1.5" title="Decompress/Decrypt Base64 or Hex Gzip">
+                    <Minimize2 size={13} />
+                    <span>Decompress / Decrypt</span>
+                  </button>
+                  <div className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 p-0.5 rounded-lg border border-zinc-200 dark:border-zinc-700 text-xs font-mono">
+                    {(['gzip', 'deflate'] as const).map(algo => (
+                      <button
+                        key={algo}
+                        onClick={() => setGzipAlgorithm(algo)}
+                        className={`px-2 py-0.5 rounded uppercase font-bold transition-all ${
+                          gzipAlgorithm === algo
+                            ? 'bg-[#ff6b00] text-white shadow-xs'
+                            : 'text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200'
+                        }`}
+                        title={`Algorithm: ${algo}`}
+                      >
+                        {algo}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 p-0.5 rounded-lg border border-zinc-200 dark:border-zinc-700 text-xs font-mono">
+                    {(['base64', 'hex'] as const).map(fmt => (
+                      <button
+                        key={fmt}
+                        onClick={() => setGzipFormat(fmt)}
+                        className={`px-2 py-0.5 rounded uppercase font-bold transition-all ${
+                          gzipFormat === fmt
+                            ? 'bg-[#ff6b00] text-white shadow-xs'
+                            : 'text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200'
+                        }`}
+                        title={`Format: ${fmt}`}
+                      >
+                        {fmt}
+                      </button>
+                    ))}
+                  </div>
+                  <label className="btn-secondary py-1 px-2.5 text-xs flex items-center gap-1 cursor-pointer" title="Upload .gz file directly to decompress">
+                    <Upload size={13} />
+                    <span>Upload .gz</span>
+                    <input type="file" onChange={handleGzipFileUpload} accept=".gz,.gzip,.deflate,.bin" className="hidden" />
+                  </label>
+                  {gzipRawBytes && (
+                    <button onClick={handleDownloadGz} className="btn-secondary py-1 px-2.5 text-xs flex items-center gap-1" title="Download compressed .gz file">
+                      <Download size={13} />
+                      <span>Save .gz</span>
+                    </button>
+                  )}
                 </>
               )}
               {activeTool === 'base64' && (
@@ -797,6 +991,8 @@ export default function DevToolbox({ initialTool = 'json' }: DevToolboxProps) {
                   setInputVal('');
                   setOutputVal('');
                   setStatusMsg('');
+                  setGzipStats(null);
+                  setGzipRawBytes(null);
                 }} 
                 className="btn-secondary py-1 px-2 btn-spring text-red-600 hover:text-red-700"
                 title="Clear"
@@ -806,18 +1002,36 @@ export default function DevToolbox({ initialTool = 'json' }: DevToolboxProps) {
             </div>
           </div>
 
+          {/* Gzip Metrics HUD */}
+          {activeTool === 'gzip' && gzipStats && (
+            <div className="card p-2 px-4 flex flex-wrap items-center justify-between gap-3 text-xs font-mono bg-zinc-50/80 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 shrink-0">
+              <div className="flex items-center gap-4 flex-wrap">
+                <span>Raw Payload: <strong className="text-zinc-900 dark:text-zinc-100">{gzipStats.originalSize} B</strong></span>
+                <span>Compressed: <strong className="text-[#ff6b00]">{gzipStats.compressedSize} B</strong></span>
+                <span>Ratio: <strong className={gzipStats.ratio >= 0 ? "text-emerald-500" : "text-amber-500"}>
+                  {gzipStats.ratio >= 0 ? `${gzipStats.ratio.toFixed(1)}% smaller` : 'expanded'}
+                </strong></span>
+              </div>
+              <span className="text-[10px] text-zinc-400 font-mono">
+                {gzipAlgorithm.toUpperCase()} • {gzipFormat.toUpperCase()} representation
+              </span>
+            </div>
+          )}
+
           {/* Side-by-side Input and Output */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1 min-h-0">
             {/* Input Box */}
             <div className="card flex flex-col overflow-hidden border-2 border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
               <div className="p-2.5 px-4 dark-terminal-header border-b-2 border-zinc-200 dark:border-zinc-800 flex items-center justify-between text-xs font-mono font-bold">
-                <span>Input Payload</span>
+                <span>
+                  {activeTool === 'gzip' ? 'Input Payload (Plaintext or Base64 / Hex)' : 'Input Payload'}
+                </span>
                 <span className="text-zinc-400 font-normal">{inputVal.length} chars</span>
               </div>
               <textarea
                 value={inputVal}
                 onChange={(e) => setInputVal(e.target.value)}
-                placeholder="Paste or type content here..."
+                placeholder={activeTool === 'gzip' ? "Paste plaintext to compress, or Base64/Hex to decompress..." : "Paste or type content here..."}
                 className="flex-1 w-full p-3 font-mono text-xs outline-none resize-none bg-transparent dark:text-zinc-100 select-text"
               />
             </div>
@@ -825,7 +1039,9 @@ export default function DevToolbox({ initialTool = 'json' }: DevToolboxProps) {
             {/* Output Box */}
             <div className="card flex flex-col overflow-hidden border-2 border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
               <div className="p-2.5 px-4 dark-terminal-header border-b-2 border-zinc-200 dark:border-zinc-800 flex items-center justify-between text-xs font-mono font-bold">
-                <span>Output Result</span>
+                <span>
+                  {activeTool === 'gzip' ? `Result (${gzipFormat.toUpperCase()} or Decoded Plaintext)` : 'Output Result'}
+                </span>
                 <button onClick={() => copyToClipboard(outputVal)} className="btn-terminal btn-spring">
                   {copied ? <Check size={12} className="text-green-600" /> : <Copy size={12} />}
                   <span>{copied ? 'Copied' : 'Copy'}</span>

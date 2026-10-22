@@ -16,7 +16,8 @@ import {
   ShieldCheck, 
   FileJson,
   Regex,
-  ListOrdered
+  ListOrdered,
+  FileArchive
 } from 'lucide-react';
 
 export interface CommandItem {
@@ -160,6 +161,19 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
         onClose();
       },
       keywords: ['sort', 'dedupe', 'lines', 'case', 'trim', 'slug', 'casing', 'text']
+    },
+    {
+      id: 'tool-gzip',
+      title: 'Gzip Encrypt / Decrypt',
+      subtitle: 'Compress & decompress Gzip/Deflate payloads (Base64 & Hex)',
+      category: 'Dev Toolbox',
+      icon: FileArchive,
+      action: () => {
+        onNavigateTab('toolbox');
+        onNavigateToolbox?.('gzip');
+        onClose();
+      },
+      keywords: ['gzip', 'gunzip', 'compress', 'decompress', 'encrypt', 'decrypt', 'deflate', 'archive', 'zip']
     },
     {
       id: 'tool-json',
