@@ -679,13 +679,13 @@ export default function SqlCompare() {
 
         {/* Collapsible Advanced Settings Panel */}
         {showAdvanced && (
-          <div className="p-5 bg-zinc-50 border-t-2 border-zinc-200 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-fade-in text-sm dot-pattern">
+          <div className="p-5 bg-zinc-50 dark:bg-zinc-900 border-t-2 border-zinc-200 dark:border-zinc-800 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-fade-in text-sm dot-pattern">
             {/* Casing Rules */}
-            <div className="card p-4 bg-white flex flex-col gap-3">
-              <span className="font-extrabold text-[10px] text-zinc-400 font-mono uppercase tracking-widest border-b border-zinc-100 pb-1.5">Casing Rules</span>
+            <div className="card p-4 bg-white dark:bg-zinc-800/80 border-zinc-200 dark:border-zinc-700 flex flex-col gap-3">
+              <span className="font-extrabold text-[10px] text-zinc-400 font-mono uppercase tracking-widest border-b border-zinc-100 dark:border-zinc-700 pb-1.5">SQL Casing</span>
               
               <div className="flex items-center justify-between gap-4">
-                <label className="text-zinc-600 text-xs font-mono font-bold">Keywords:</label>
+                <label className="text-zinc-600 dark:text-zinc-300 text-xs font-mono font-bold">Keywords:</label>
                 <select 
                   value={keywordCase} 
                   onChange={(e) => setKeywordCase(e.target.value as any)}
@@ -698,7 +698,7 @@ export default function SqlCompare() {
               </div>
 
               <div className="flex items-center justify-between gap-4">
-                <label className="text-zinc-600 text-xs font-mono font-bold">Functions:</label>
+                <label className="text-zinc-600 dark:text-zinc-300 text-xs font-mono font-bold">Functions:</label>
                 <select 
                   value={functionCase} 
                   onChange={(e) => setFunctionCase(e.target.value as any)}
@@ -711,7 +711,7 @@ export default function SqlCompare() {
               </div>
 
               <div className="flex items-center justify-between gap-4">
-                <label className="text-zinc-600 text-xs font-mono font-bold">Data Types:</label>
+                <label className="text-zinc-600 dark:text-zinc-300 text-xs font-mono font-bold">Data Types:</label>
                 <select 
                   value={dataTypeCase} 
                   onChange={(e) => setDataTypeCase(e.target.value as any)}
@@ -725,10 +725,10 @@ export default function SqlCompare() {
             </div>
 
             {/* Layout Rules */}
-            <div className="card p-4 bg-white flex flex-col gap-3">
-              <span className="font-extrabold text-[10px] text-zinc-400 font-mono uppercase tracking-widest border-b border-zinc-100 pb-1.5">Logical Operators</span>
+            <div className="card p-4 bg-white dark:bg-zinc-800/80 border-zinc-200 dark:border-zinc-700 flex flex-col gap-3">
+              <span className="font-extrabold text-[10px] text-zinc-400 font-mono uppercase tracking-widest border-b border-zinc-100 dark:border-zinc-700 pb-1.5">Operators Placement</span>
               <div className="flex flex-col gap-2">
-                <label className="text-zinc-600 text-xs font-mono font-bold">Line Break Position:</label>
+                <label className="text-zinc-600 dark:text-zinc-300 text-xs font-mono font-bold">Boolean break:</label>
                 <select 
                   value={logicalOperatorNewline} 
                   onChange={(e) => setLogicalOperatorNewline(e.target.value as any)}
@@ -741,11 +741,11 @@ export default function SqlCompare() {
             </div>
 
             {/* List Formatting */}
-            <div className="card p-4 bg-white flex flex-col gap-3">
-              <span className="font-extrabold text-[10px] text-zinc-400 font-mono uppercase tracking-widest border-b border-zinc-100 pb-1.5">Expression Spacing</span>
+            <div className="card p-4 bg-white dark:bg-zinc-800/80 border-zinc-200 dark:border-zinc-700 flex flex-col gap-3">
+              <span className="font-extrabold text-[10px] text-zinc-400 font-mono uppercase tracking-widest border-b border-zinc-100 dark:border-zinc-700 pb-1.5">SQL Width Rules</span>
               <div className="flex flex-col gap-2">
                 <div className="flex items-center justify-between gap-4">
-                  <label className="text-zinc-600 text-xs font-mono font-bold">Wrap Threshold:</label>
+                  <label className="text-zinc-600 dark:text-zinc-300 text-xs font-mono font-bold">Wrap Threshold:</label>
                   <span className="text-xs font-mono font-extrabold text-[#ff6b00]">{expressionWidth} chars</span>
                 </div>
                 <input 
@@ -755,19 +755,19 @@ export default function SqlCompare() {
                   step="5"
                   value={expressionWidth} 
                   onChange={(e) => setExpressionWidth(parseInt(e.target.value))}
-                  className="w-full accent-[#ff6b00] h-2 bg-zinc-200 rounded-lg appearance-none cursor-pointer border border-zinc-300"
+                  className="w-full accent-[#ff6b00] h-2 bg-zinc-200 dark:bg-zinc-700 rounded-lg appearance-none cursor-pointer border border-zinc-300 dark:border-zinc-600"
                 />
                 <span className="text-[10px] text-zinc-400 font-mono">Controls parentheses list breaking.</span>
               </div>
             </div>
 
             {/* Redgate Presets Info */}
-            <div className="card p-4 bg-zinc-50 flex flex-col gap-2 border-dashed">
-              <span className="font-extrabold text-[10px] text-zinc-700 font-mono uppercase tracking-widest flex items-center gap-1">
+            <div className="card p-4 bg-zinc-50 dark:bg-zinc-800/40 border-zinc-200 dark:border-zinc-700 flex flex-col gap-2 border-dashed">
+              <span className="font-extrabold text-[10px] text-zinc-700 dark:text-zinc-300 font-mono uppercase tracking-widest flex items-center gap-1">
                 <Sparkles size={12} className="text-[#ff6b00]" />
                 Redgate Prompt Style
               </span>
-              <p className="text-[11px] text-zinc-500 leading-normal font-mono">
+              <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-normal font-mono">
                 Aligns columns, normalizes JOIN conditions, and applies case regulations to standard dialect systems.
               </p>
             </div>

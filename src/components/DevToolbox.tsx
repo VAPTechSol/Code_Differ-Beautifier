@@ -670,7 +670,7 @@ export default function DevToolbox({ initialTool = 'json' }: DevToolboxProps) {
                 value={regexTestStr}
                 onChange={(e) => setRegexTestStr(e.target.value)}
                 placeholder="Paste sample text to test matches against..."
-                className="flex-1 w-full p-3 font-mono text-xs outline-none resize-none bg-transparent dark:text-zinc-100 select-text"
+                className="flex-1 w-full p-3 font-mono text-xs outline-none resize-none bg-transparent text-zinc-900 dark:text-zinc-100 select-text"
               />
             </div>
 
@@ -781,14 +781,14 @@ export default function DevToolbox({ initialTool = 'json' }: DevToolboxProps) {
                   value={textPrefix}
                   onChange={e => setTextPrefix(e.target.value)}
                   placeholder="Prefix..."
-                  className="w-20 px-2 py-1 text-xs font-mono border rounded border-zinc-300 dark:border-zinc-700 bg-transparent"
+                  className="w-20 px-2 py-1 text-xs font-mono border rounded border-zinc-300 dark:border-zinc-700 bg-transparent text-zinc-900 dark:text-zinc-100"
                 />
                 <input
                   type="text"
                   value={textSuffix}
                   onChange={e => setTextSuffix(e.target.value)}
                   placeholder="Suffix..."
-                  className="w-20 px-2 py-1 text-xs font-mono border rounded border-zinc-300 dark:border-zinc-700 bg-transparent"
+                  className="w-20 px-2 py-1 text-xs font-mono border rounded border-zinc-300 dark:border-zinc-700 bg-transparent text-zinc-900 dark:text-zinc-100"
                 />
                 <button onClick={applyPrefixSuffix} className="btn-secondary py-1 px-2 text-xs font-mono">Apply</button>
               </div>
@@ -825,7 +825,7 @@ export default function DevToolbox({ initialTool = 'json' }: DevToolboxProps) {
               value={textToolInput}
               onChange={e => setTextToolInput(e.target.value)}
               placeholder="Paste lines of text, lists, or logs here..."
-              className="flex-1 w-full p-4 font-mono text-xs outline-none resize-none bg-transparent dark:text-zinc-100 select-text"
+              className="flex-1 w-full p-4 font-mono text-xs outline-none resize-none bg-transparent text-zinc-900 dark:text-zinc-100 select-text"
             />
           </div>
         </div>
@@ -863,7 +863,7 @@ export default function DevToolbox({ initialTool = 'json' }: DevToolboxProps) {
           <textarea
             value={scratchpad}
             onChange={(e) => setScratchpad(e.target.value)}
-            className="flex-1 w-full p-4 font-mono text-xs outline-none resize-none bg-transparent dark:text-zinc-100 select-text"
+            className="flex-1 w-full p-4 font-mono text-xs outline-none resize-none bg-transparent text-zinc-900 dark:text-zinc-100 select-text"
             placeholder="Type or paste scratch notes, API keys, JSON payloads, or todos..."
           />
         </div>
@@ -1032,7 +1032,7 @@ export default function DevToolbox({ initialTool = 'json' }: DevToolboxProps) {
                 value={inputVal}
                 onChange={(e) => setInputVal(e.target.value)}
                 placeholder={activeTool === 'gzip' ? "Paste plaintext to compress, or Base64/Hex to decompress..." : "Paste or type content here..."}
-                className="flex-1 w-full p-3 font-mono text-xs outline-none resize-none bg-transparent dark:text-zinc-100 select-text"
+                className="flex-1 w-full p-3 font-mono text-xs outline-none resize-none bg-transparent text-zinc-900 dark:text-zinc-100 select-text"
               />
             </div>
 

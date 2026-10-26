@@ -465,8 +465,8 @@ export default function Beautifier() {
       />
       
       {/* Settings bar */}
-      <div className="card flex flex-col overflow-hidden border-2 border-zinc-200 shrink-0">
-        <div className="p-4 flex flex-wrap items-center justify-between gap-4 border-b-2 border-zinc-200">
+      <div className="card flex flex-col overflow-hidden border-2 border-zinc-200 dark:border-zinc-800 shrink-0">
+        <div className="p-4 flex flex-wrap items-center justify-between gap-4 border-b-2 border-zinc-200 dark:border-zinc-800">
           <div className="flex flex-wrap items-center gap-6">
             <div className="flex flex-col gap-1">
               <span className="text-xs font-mono font-bold text-zinc-400 uppercase tracking-wider">Language</span>
@@ -523,7 +523,7 @@ export default function Beautifier() {
                 <span className="text-xs font-mono font-bold text-zinc-400 uppercase tracking-wider">SQL Parameters</span>
                 <button 
                   onClick={() => setShowSqlSettings(!showSqlSettings)}
-                  className={`btn-secondary py-1.5 px-3 flex items-center gap-2 btn-spring ${showSqlSettings ? 'border-zinc-950 bg-zinc-950 text-white font-bold shadow-[2px_2px_0px_0px_#000000] hover:text-white' : ''}`}
+                  className={`btn-secondary py-1.5 px-3 flex items-center gap-2 btn-spring ${showSqlSettings ? 'border-zinc-950 dark:border-zinc-600 bg-zinc-950 dark:bg-zinc-800 text-white font-bold shadow-[2px_2px_0px_0px_#000000] hover:text-white' : ''}`}
                 >
                   <Sliders size={13} />
                   <span>Advanced SQL Settings {showSqlSettings ? '▲' : '▼'}</span>
@@ -532,12 +532,12 @@ export default function Beautifier() {
             )}
 
             <div className="flex items-center gap-2 pt-4 md:pt-0">
-              <label className="flex items-center gap-2.5 text-xs font-mono font-bold text-zinc-700 cursor-pointer select-none">
+              <label className="flex items-center gap-2.5 text-xs font-mono font-bold text-zinc-700 dark:text-zinc-300 cursor-pointer select-none">
                 <input 
                   type="checkbox" 
                   checked={autoFormat}
                   onChange={(e) => setAutoFormat(e.target.checked)}
-                  className="rounded-md border-2 border-zinc-300 text-[#ff6b00] focus:ring-[#ff6b00] h-4.5 w-4.5 accent-[#ff6b00] cursor-pointer"
+                  className="rounded-md border-2 border-zinc-300 dark:border-zinc-700 text-[#ff6b00] focus:ring-[#ff6b00] h-4.5 w-4.5 accent-[#ff6b00] cursor-pointer"
                 />
                 <span>Auto Format on Change</span>
               </label>
@@ -592,13 +592,13 @@ export default function Beautifier() {
 
         {/* SQL Specific Options Drawer */}
         {language === 'sql' && showSqlSettings && (
-          <div className="p-5 bg-zinc-50 border-t-2 border-zinc-200 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-fade-in text-sm dot-pattern">
+          <div className="p-5 bg-zinc-50 dark:bg-zinc-900 border-t-2 border-zinc-200 dark:border-zinc-800 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-fade-in text-sm dot-pattern">
             {/* SQL Casing */}
-            <div className="card p-4 bg-white flex flex-col gap-3">
-              <span className="font-extrabold text-[10px] text-zinc-400 font-mono uppercase tracking-widest border-b border-zinc-100 pb-1.5">SQL Casing</span>
+            <div className="card p-4 bg-white dark:bg-zinc-800/80 border-zinc-200 dark:border-zinc-700 flex flex-col gap-3">
+              <span className="font-extrabold text-[10px] text-zinc-400 font-mono uppercase tracking-widest border-b border-zinc-100 dark:border-zinc-700 pb-1.5">SQL Casing</span>
               
               <div className="flex items-center justify-between gap-4">
-                <label className="text-zinc-600 text-xs font-mono font-bold">Keywords:</label>
+                <label className="text-zinc-600 dark:text-zinc-300 text-xs font-mono font-bold">Keywords:</label>
                 <select 
                   value={sqlKeywordCase} 
                   onChange={(e) => setSqlKeywordCase(e.target.value as any)}
@@ -611,7 +611,7 @@ export default function Beautifier() {
               </div>
 
               <div className="flex items-center justify-between gap-4">
-                <label className="text-zinc-600 text-xs font-mono font-bold">Functions:</label>
+                <label className="text-zinc-600 dark:text-zinc-300 text-xs font-mono font-bold">Functions:</label>
                 <select 
                   value={sqlFunctionCase} 
                   onChange={(e) => setSqlFunctionCase(e.target.value as any)}
@@ -624,7 +624,7 @@ export default function Beautifier() {
               </div>
 
               <div className="flex items-center justify-between gap-4">
-                <label className="text-zinc-600 text-xs font-mono font-bold">Data Types:</label>
+                <label className="text-zinc-600 dark:text-zinc-300 text-xs font-mono font-bold">Data Types:</label>
                 <select 
                   value={sqlDataTypeCase} 
                   onChange={(e) => setSqlDataTypeCase(e.target.value as any)}
@@ -638,10 +638,10 @@ export default function Beautifier() {
             </div>
 
             {/* SQL Layout */}
-            <div className="card p-4 bg-white flex flex-col gap-3">
-              <span className="font-extrabold text-[10px] text-zinc-400 font-mono uppercase tracking-widest border-b border-zinc-100 pb-1.5">Operators Placement</span>
+            <div className="card p-4 bg-white dark:bg-zinc-800/80 border-zinc-200 dark:border-zinc-700 flex flex-col gap-3">
+              <span className="font-extrabold text-[10px] text-zinc-400 font-mono uppercase tracking-widest border-b border-zinc-100 dark:border-zinc-700 pb-1.5">Operators Placement</span>
               <div className="flex flex-col gap-2">
-                <label className="text-zinc-600 text-xs font-mono font-bold">Boolean break:</label>
+                <label className="text-zinc-600 dark:text-zinc-300 text-xs font-mono font-bold">Boolean break:</label>
                 <select 
                   value={sqlLogicalOperatorNewline} 
                   onChange={(e) => setSqlLogicalOperatorNewline(e.target.value as any)}
@@ -654,11 +654,11 @@ export default function Beautifier() {
             </div>
 
             {/* SQL Width */}
-            <div className="card p-4 bg-white flex flex-col gap-3">
-              <span className="font-extrabold text-[10px] text-zinc-400 font-mono uppercase tracking-widest border-b border-zinc-100 pb-1.5">SQL Width Rules</span>
+            <div className="card p-4 bg-white dark:bg-zinc-800/80 border-zinc-200 dark:border-zinc-700 flex flex-col gap-3">
+              <span className="font-extrabold text-[10px] text-zinc-400 font-mono uppercase tracking-widest border-b border-zinc-100 dark:border-zinc-700 pb-1.5">SQL Width Rules</span>
               <div className="flex flex-col gap-2">
                 <div className="flex items-center justify-between gap-4">
-                  <label className="text-zinc-600 text-xs font-mono font-bold">Wrap Threshold:</label>
+                  <label className="text-zinc-600 dark:text-zinc-300 text-xs font-mono font-bold">Wrap Threshold:</label>
                   <span className="text-xs font-mono font-extrabold text-[#ff6b00]">{sqlExpressionWidth} chars</span>
                 </div>
                 <input 
@@ -668,19 +668,19 @@ export default function Beautifier() {
                   step="5"
                   value={sqlExpressionWidth} 
                   onChange={(e) => setSqlExpressionWidth(parseInt(e.target.value))}
-                  className="w-full accent-[#ff6b00] h-2 bg-zinc-200 rounded-lg appearance-none cursor-pointer border border-zinc-300"
+                  className="w-full accent-[#ff6b00] h-2 bg-zinc-200 dark:bg-zinc-700 rounded-lg appearance-none cursor-pointer border border-zinc-300 dark:border-zinc-600"
                 />
                 <span className="text-[10px] text-zinc-400 font-mono font-bold">Controls list breaking.</span>
               </div>
             </div>
 
             {/* Info panel */}
-            <div className="card p-4 bg-zinc-50 flex flex-col gap-2 border-dashed">
-              <span className="font-extrabold text-[10px] text-zinc-700 font-mono uppercase tracking-widest flex items-center gap-1">
+            <div className="card p-4 bg-zinc-50 dark:bg-zinc-800/40 border-zinc-200 dark:border-zinc-700 flex flex-col gap-2 border-dashed">
+              <span className="font-extrabold text-[10px] text-zinc-700 dark:text-zinc-300 font-mono uppercase tracking-widest flex items-center gap-1">
                 <Sparkles size={12} className="text-[#ff6b00]" />
                 Redgate Engine Active
               </span>
-              <p className="text-[11px] text-zinc-500 leading-normal font-mono">
+              <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-normal font-mono">
                 SQL dialect-aware token parsing formats your queries dynamically according to standard Redgate casing guidelines.
               </p>
             </div>
