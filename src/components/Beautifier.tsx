@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import Editor from '@monaco-editor/react';
 import jsBeautify from 'js-beautify';
 import { format as formatSql } from 'sql-formatter';
@@ -8,10 +8,14 @@ import {
   Check, 
   Trash2, 
   Download,
-  Sliders
+  Sliders,
+  Shield
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import EditorSkeleton from './EditorSkeleton';
+import SecretShieldModal from './SecretShieldModal';
+import ToastContainer, { type ToastMessage } from './Toast';
+import { detectAndMaskSecrets, unmaskSecrets, type DetectedSecret } from '../utils/secretDetector';
 
 const LANGUAGES = [
   // Popular first
@@ -106,6 +110,47 @@ export default function Beautifier() {
 
   const inputEditorRef = useRef<any>(null);
   
+  // Sensitive Information Shield State
+  const [autoMaskSecrets, setAutoMaskSecrets] = useState(() => {
+    return localStorage.getItem('align-beautifier-automask') !== 'false';
+  });
+  const [protectedSecrets, setProtectedSecrets] = useState<DetectedSecret[]>([]);
+  const [isShieldModalOpen, setIsShieldModalOpen] = useState(false);
+  const [lastMaskedSecrets, setLastMaskedSecrets] = useState<DetectedSecret[] | null>(null);
+
+  // Toast notifications state
+  const [toasts, setToasts] = useState<ToastMessage[]>([]);
+
+  const addToast = useCallback((title: string, message?: string, type: 'success' | 'info' | 'warning' = 'success') => {
+    const id = `${Date.now()}-${Math.random()}`;
+    setToasts(prev => [...prev, { id, title, message, type }]);
+  }, []);
+
+  const dismissToast = useCallback((id: string) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  }, []);
+
+  const handleToggleAutoMask = (enabled: boolean) => {
+    setAutoMaskSecrets(enabled);
+    localStorage.setItem('align-beautifier-automask', String(enabled));
+    addToast(
+      enabled ? '🛡️ Secret Shield Activated' : '⚠️ Secret Shield Disabled',
+      enabled ? 'Will automatically mask pasted tokens and API keys' : 'Pasted tokens will remain unmasked',
+      enabled ? 'success' : 'warning'
+    );
+  };
+
+  const handleUnmask = useCallback(() => {
+    if (!lastMaskedSecrets || !inputEditorRef.current) return;
+    const fullValue = inputEditorRef.current.getValue();
+    const unmasked = unmaskSecrets(fullValue, lastMaskedSecrets);
+    inputEditorRef.current.setValue(unmasked);
+    setInputCode(unmasked);
+    setProtectedSecrets([]);
+    setLastMaskedSecrets(null);
+    addToast('Secrets Unmasked', 'Reverted back to raw original values', 'info');
+  }, [lastMaskedSecrets, addToast]);
+  
   // Draggable Splitter States
   const [splitWidth, setSplitWidth] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
@@ -155,6 +200,31 @@ export default function Beautifier() {
     inputEditorRef.current = editor;
     editor.onDidChangeModelContent(() => {
       setInputCode(editor.getValue());
+    });
+
+    // Detect and auto-mask sensitive tokens & keys pasted into Beautifier editor
+    editor.onDidPaste((e: any) => {
+      if (!autoMaskSecrets) return;
+      const model = editor.getModel();
+      if (!model) return;
+      const pastedText = model.getValueInRange(e.range);
+      const detection = detectAndMaskSecrets(pastedText);
+      if (detection.hasSecrets) {
+        editor.executeEdits('secret-shield', [
+          {
+            range: e.range,
+            text: detection.maskedText,
+            forceMoveMarkers: true
+          }
+        ]);
+        setProtectedSecrets(prev => [...prev, ...detection.secrets]);
+        setLastMaskedSecrets(detection.secrets);
+        addToast(
+          '🛡️ Sensitive Credentials Masked!',
+          `Detected & masked ${detection.detectedCount} secret(s) (${detection.secretTypes.join(', ')}). Your credentials are protected.`,
+          'warning'
+        );
+      }
     });
   };
 
@@ -383,6 +453,16 @@ export default function Beautifier() {
 
   return (
     <div className="animate-fade-in flex flex-col gap-4 flex-1 min-h-0 relative">
+      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
+
+      <SecretShieldModal
+        isOpen={isShieldModalOpen}
+        onClose={() => setIsShieldModalOpen(false)}
+        secrets={protectedSecrets}
+        onUnmask={lastMaskedSecrets ? handleUnmask : undefined}
+        autoMaskEnabled={autoMaskSecrets}
+        onToggleAutoMask={handleToggleAutoMask}
+      />
       
       {/* Settings bar */}
       <div className="card flex flex-col overflow-hidden border-2 border-zinc-200 shrink-0">
@@ -465,6 +545,23 @@ export default function Beautifier() {
           </div>
 
           <div className="flex items-center gap-2.5">
+            {/* Secret Shield Status Pill */}
+            <button
+              onClick={() => setIsShieldModalOpen(true)}
+              className={`btn-spring flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-mono font-bold border transition-all ${
+                protectedSecrets.length > 0
+                  ? 'bg-orange-500/10 text-[#ff6b00] border-orange-500/40 shadow-xs animate-pulse'
+                  : 'bg-white dark:bg-zinc-800 text-zinc-500 border-zinc-200 dark:border-zinc-700 hover:text-zinc-900 dark:hover:text-white'
+              }`}
+              title="Secret Shield: Protects credentials, tokens & API keys on paste"
+            >
+              <Shield size={12} className={protectedSecrets.length > 0 ? 'text-[#ff6b00]' : 'text-zinc-400'} />
+              <span className="hidden sm:inline">Shield</span>
+              <span className="text-[10px] px-1 rounded bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300">
+                {protectedSecrets.length > 0 ? `${protectedSecrets.length} Masked` : (autoMaskSecrets ? 'ON' : 'OFF')}
+              </span>
+            </button>
+
             <button 
               onClick={performFormatting} 
               className={`btn-primary py-1.5 px-4 btn-spring text-xs ${formatSuccess ? 'bg-[#ff6b00] border-black hover:bg-[#ff8533] text-white shadow-[2px_2px_0px_0px_#000000]' : ''}`}

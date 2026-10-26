@@ -18,11 +18,13 @@ import {
   ChevronRight,
   FolderOpen,
   Type,
-  FileCode2
+  FileCode2,
+  Shield
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import EditorSkeleton from './EditorSkeleton';
 import ChangeInspector from './ChangeInspector';
+import SecretShieldModal from './SecretShieldModal';
 import ToastContainer, { type ToastMessage } from './Toast';
 import { 
   computeDetailedDiff, 
@@ -32,6 +34,11 @@ import {
   decodeDiffShare,
   type DiffHunk
 } from '../utils/diffUtils';
+import { 
+  detectAndMaskSecrets, 
+  unmaskSecrets, 
+  type DetectedSecret 
+} from '../utils/secretDetector';
 
 const LANGUAGES = [
   // Popular first
@@ -215,6 +222,45 @@ export default function CodeDiff() {
     setToasts(prev => prev.filter(t => t.id !== id));
   }, []);
 
+  // Sensitive Information Shield State
+  const [autoMaskSecrets, setAutoMaskSecrets] = useState(() => {
+    return localStorage.getItem('align-diff-automask') !== 'false';
+  });
+  const [protectedSecrets, setProtectedSecrets] = useState<DetectedSecret[]>([]);
+  const [isShieldModalOpen, setIsShieldModalOpen] = useState(false);
+  const [lastMaskedOp, setLastMaskedOp] = useState<{
+    target: 'original' | 'modified';
+    secrets: DetectedSecret[];
+  } | null>(null);
+
+  const handleToggleAutoMask = (enabled: boolean) => {
+    setAutoMaskSecrets(enabled);
+    localStorage.setItem('align-diff-automask', String(enabled));
+    addToast(
+      enabled ? '🛡️ Secret Shield Activated' : '⚠️ Secret Shield Disabled',
+      enabled ? 'Will automatically mask pasted tokens and API keys' : 'Pasted tokens will remain unmasked',
+      enabled ? 'success' : 'warning'
+    );
+  };
+
+  const handleUnmask = useCallback(() => {
+    if (!lastMaskedOp || !diffEditorRef.current) return;
+    const targetEditor = lastMaskedOp.target === 'original'
+      ? diffEditorRef.current.getOriginalEditor()
+      : diffEditorRef.current.getModifiedEditor();
+
+    if (targetEditor) {
+      const fullValue = targetEditor.getValue();
+      const unmasked = unmaskSecrets(fullValue, lastMaskedOp.secrets);
+      targetEditor.setValue(unmasked);
+      if (lastMaskedOp.target === 'original') setOriginalCode(unmasked);
+      else setModifiedCode(unmasked);
+    }
+    setProtectedSecrets([]);
+    setLastMaskedOp(null);
+    addToast('Secrets Unmasked', 'Reverted back to raw original values', 'info');
+  }, [lastMaskedOp, addToast]);
+
   // Sync settings back to localStorage
   useEffect(() => {
     localStorage.setItem('align-diff-language', language);
@@ -249,15 +295,73 @@ export default function CodeDiff() {
 
   const handleEditorMount = (editor: any) => {
     diffEditorRef.current = editor;
+    const origEditor = editor.getOriginalEditor();
+    const modEditor = editor.getModifiedEditor();
 
     // Listen to changes in original editor
-    editor.getOriginalEditor().onDidChangeModelContent(() => {
-      setOriginalCode(editor.getOriginalEditor().getValue());
+    origEditor.onDidChangeModelContent(() => {
+      setOriginalCode(origEditor.getValue());
     });
 
     // Listen to changes in modified editor
-    editor.getModifiedEditor().onDidChangeModelContent(() => {
-      setModifiedCode(editor.getModifiedEditor().getValue());
+    modEditor.onDidChangeModelContent(() => {
+      setModifiedCode(modEditor.getValue());
+    });
+
+    // Detect and auto-mask sensitive tokens & keys pasted into Original editor
+    origEditor.onDidPaste((e: any) => {
+      if (!autoMaskSecrets) return;
+      const model = origEditor.getModel();
+      if (!model) return;
+      const pastedText = model.getValueInRange(e.range);
+      const detection = detectAndMaskSecrets(pastedText);
+      if (detection.hasSecrets) {
+        origEditor.executeEdits('secret-shield', [
+          {
+            range: e.range,
+            text: detection.maskedText,
+            forceMoveMarkers: true
+          }
+        ]);
+        setProtectedSecrets(prev => [...prev, ...detection.secrets]);
+        setLastMaskedOp({
+          target: 'original',
+          secrets: detection.secrets
+        });
+        addToast(
+          '🛡️ Sensitive Credentials Masked!',
+          `Detected & masked ${detection.detectedCount} secret(s) (${detection.secretTypes.join(', ')}). Your credentials are protected.`,
+          'warning'
+        );
+      }
+    });
+
+    // Detect and auto-mask sensitive tokens & keys pasted into Modified editor
+    modEditor.onDidPaste((e: any) => {
+      if (!autoMaskSecrets) return;
+      const model = modEditor.getModel();
+      if (!model) return;
+      const pastedText = model.getValueInRange(e.range);
+      const detection = detectAndMaskSecrets(pastedText);
+      if (detection.hasSecrets) {
+        modEditor.executeEdits('secret-shield', [
+          {
+            range: e.range,
+            text: detection.maskedText,
+            forceMoveMarkers: true
+          }
+        ]);
+        setProtectedSecrets(prev => [...prev, ...detection.secrets]);
+        setLastMaskedOp({
+          target: 'modified',
+          secrets: detection.secrets
+        });
+        addToast(
+          '🛡️ Sensitive Credentials Masked!',
+          `Detected & masked ${detection.detectedCount} secret(s) (${detection.secretTypes.join(', ')}). Your credentials are protected.`,
+          'warning'
+        );
+      }
     });
   };
 
@@ -268,15 +372,30 @@ export default function CodeDiff() {
     const reader = new FileReader();
     reader.onload = (event) => {
       const text = event.target?.result as string;
+      let textToLoad = text;
+
+      if (autoMaskSecrets) {
+        const detection = detectAndMaskSecrets(text);
+        if (detection.hasSecrets) {
+          textToLoad = detection.maskedText;
+          setProtectedSecrets(prev => [...prev, ...detection.secrets]);
+          addToast(
+            '🛡️ Sensitive Credentials Masked in File!',
+            `Masked ${detection.detectedCount} secret(s) (${detection.secretTypes.join(', ')}) from ${file.name}.`,
+            'warning'
+          );
+        }
+      }
+
       if (target === 'original') {
-        setOriginalCode(text);
+        setOriginalCode(textToLoad);
         if (diffEditorRef.current) {
-          diffEditorRef.current.getOriginalEditor().setValue(text);
+          diffEditorRef.current.getOriginalEditor().setValue(textToLoad);
         }
       } else {
-        setModifiedCode(text);
+        setModifiedCode(textToLoad);
         if (diffEditorRef.current) {
-          diffEditorRef.current.getModifiedEditor().setValue(text);
+          diffEditorRef.current.getModifiedEditor().setValue(textToLoad);
         }
       }
 
@@ -463,6 +582,16 @@ export default function CodeDiff() {
         onExportHtml={handleExportHtml}
         onCopyChangelog={handleCopyMarkdown}
         activeHunkId={activeHunkId}
+      />
+
+      {/* Secret Shield Modal */}
+      <SecretShieldModal
+        isOpen={isShieldModalOpen}
+        onClose={() => setIsShieldModalOpen(false)}
+        secrets={protectedSecrets}
+        onUnmask={lastMaskedOp ? handleUnmask : undefined}
+        autoMaskEnabled={autoMaskSecrets}
+        onToggleAutoMask={handleToggleAutoMask}
       />
 
       {/* Control bar */}
@@ -678,6 +807,23 @@ export default function CodeDiff() {
         {/* Diff Navigation Controls (Prev/Next Diff) & Match Status */}
         <div className="flex items-center gap-3">
           
+          {/* Secret Shield Status Pill */}
+          <button
+            onClick={() => setIsShieldModalOpen(true)}
+            className={`btn-spring flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-mono font-bold border transition-all ${
+              protectedSecrets.length > 0
+                ? 'bg-orange-500/10 text-[#ff6b00] border-orange-500/40 shadow-xs animate-pulse'
+                : 'bg-white dark:bg-zinc-800 text-zinc-500 border-zinc-200 dark:border-zinc-700 hover:text-zinc-900 dark:hover:text-white'
+            }`}
+            title="Secret Shield: Protects credentials, tokens & API keys on paste"
+          >
+            <Shield size={12} className={protectedSecrets.length > 0 ? 'text-[#ff6b00]' : 'text-zinc-400'} />
+            <span className="hidden sm:inline">Shield</span>
+            <span className="text-[10px] px-1 rounded bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300">
+              {protectedSecrets.length > 0 ? `${protectedSecrets.length} Masked` : (autoMaskSecrets ? 'ON' : 'OFF')}
+            </span>
+          </button>
+
           {/* Difference Navigator */}
           <div className="flex items-center bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg p-0.5 shadow-2xs">
             <button

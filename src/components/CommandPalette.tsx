@@ -279,6 +279,18 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
 
     // Actions
     {
+      id: 'action-shield',
+      title: 'Secret Shield Protection',
+      subtitle: 'Auto-mask sensitive API keys, tokens & credentials on paste',
+      category: 'Actions',
+      icon: ShieldCheck,
+      action: () => {
+        onNavigateTab('diff');
+        onClose();
+      },
+      keywords: ['shield', 'secret', 'token', 'key', 'mask', 'security', 'privacy', 'password']
+    },
+    {
       id: 'action-inspect',
       title: 'Inspect What Changed',
       subtitle: 'Open detailed hunk and token breakdown of current diff',

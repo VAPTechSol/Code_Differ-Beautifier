@@ -14,11 +14,13 @@ import {
   Download,
   ChevronLeft,
   ChevronRight,
-  FileCode2
+  FileCode2,
+  Shield
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import EditorSkeleton from './EditorSkeleton';
 import ChangeInspector from './ChangeInspector';
+import SecretShieldModal from './SecretShieldModal';
 import ToastContainer, { type ToastMessage } from './Toast';
 import { 
   computeDetailedDiff, 
@@ -27,6 +29,11 @@ import {
   encodeDiffShare,
   type DiffHunk
 } from '../utils/diffUtils';
+import { 
+  detectAndMaskSecrets, 
+  unmaskSecrets, 
+  type DetectedSecret 
+} from '../utils/secretDetector';
 
 const SQL_DIALECTS = [
   { value: 'sql', label: 'Standard SQL' },
@@ -170,18 +177,76 @@ export default function SqlCompare() {
 
   const handleEditorMount = (editor: any) => {
     diffEditorRef.current = editor;
+    const origEditor = editor.getOriginalEditor();
+    const modEditor = editor.getModifiedEditor();
 
     // Sync edited values back to raw state and display state
-    editor.getOriginalEditor().onDidChangeModelContent(() => {
-      const val = editor.getOriginalEditor().getValue();
+    origEditor.onDidChangeModelContent(() => {
+      const val = origEditor.getValue();
       setOriginalSql(val);
       setDisplayOriginal(val); // Keeps display state in sync, preventing Monaco from resetting cursor
     });
 
-    editor.getModifiedEditor().onDidChangeModelContent(() => {
-      const val = editor.getModifiedEditor().getValue();
+    modEditor.onDidChangeModelContent(() => {
+      const val = modEditor.getValue();
       setModifiedSql(val);
       setDisplayModified(val); // Keeps display state in sync, preventing Monaco from resetting cursor
+    });
+
+    // Detect and auto-mask sensitive credentials pasted into Original SQL
+    origEditor.onDidPaste((e: any) => {
+      if (!autoMaskSecrets) return;
+      const model = origEditor.getModel();
+      if (!model) return;
+      const pastedText = model.getValueInRange(e.range);
+      const detection = detectAndMaskSecrets(pastedText);
+      if (detection.hasSecrets) {
+        origEditor.executeEdits('secret-shield', [
+          {
+            range: e.range,
+            text: detection.maskedText,
+            forceMoveMarkers: true
+          }
+        ]);
+        setProtectedSecrets(prev => [...prev, ...detection.secrets]);
+        setLastMaskedOp({
+          target: 'original',
+          secrets: detection.secrets
+        });
+        addToast(
+          '🛡️ Sensitive Credentials Masked!',
+          `Detected & masked ${detection.detectedCount} secret(s) (${detection.secretTypes.join(', ')}). Your credentials are protected.`,
+          'warning'
+        );
+      }
+    });
+
+    // Detect and auto-mask sensitive credentials pasted into Modified SQL
+    modEditor.onDidPaste((e: any) => {
+      if (!autoMaskSecrets) return;
+      const model = modEditor.getModel();
+      if (!model) return;
+      const pastedText = model.getValueInRange(e.range);
+      const detection = detectAndMaskSecrets(pastedText);
+      if (detection.hasSecrets) {
+        modEditor.executeEdits('secret-shield', [
+          {
+            range: e.range,
+            text: detection.maskedText,
+            forceMoveMarkers: true
+          }
+        ]);
+        setProtectedSecrets(prev => [...prev, ...detection.secrets]);
+        setLastMaskedOp({
+          target: 'modified',
+          secrets: detection.secrets
+        });
+        addToast(
+          '🛡️ Sensitive Credentials Masked!',
+          `Detected & masked ${detection.detectedCount} secret(s) (${detection.secretTypes.join(', ')}). Your credentials are protected.`,
+          'warning'
+        );
+      }
     });
   };
 
@@ -244,6 +309,50 @@ export default function SqlCompare() {
   const dismissToast = useCallback((id: string) => {
     setToasts(prev => prev.filter(t => t.id !== id));
   }, []);
+
+  // Sensitive Information Shield State
+  const [autoMaskSecrets, setAutoMaskSecrets] = useState(() => {
+    return localStorage.getItem('align-sql-automask') !== 'false';
+  });
+  const [protectedSecrets, setProtectedSecrets] = useState<DetectedSecret[]>([]);
+  const [isShieldModalOpen, setIsShieldModalOpen] = useState(false);
+  const [lastMaskedOp, setLastMaskedOp] = useState<{
+    target: 'original' | 'modified';
+    secrets: DetectedSecret[];
+  } | null>(null);
+
+  const handleToggleAutoMask = (enabled: boolean) => {
+    setAutoMaskSecrets(enabled);
+    localStorage.setItem('align-sql-automask', String(enabled));
+    addToast(
+      enabled ? '🛡️ Secret Shield Activated' : '⚠️ Secret Shield Disabled',
+      enabled ? 'Will automatically mask credentials & connection strings on paste' : 'Secrets will remain unmasked',
+      enabled ? 'success' : 'warning'
+    );
+  };
+
+  const handleUnmask = useCallback(() => {
+    if (!lastMaskedOp || !diffEditorRef.current) return;
+    const targetEditor = lastMaskedOp.target === 'original'
+      ? diffEditorRef.current.getOriginalEditor()
+      : diffEditorRef.current.getModifiedEditor();
+
+    if (targetEditor) {
+      const fullValue = targetEditor.getValue();
+      const unmasked = unmaskSecrets(fullValue, lastMaskedOp.secrets);
+      targetEditor.setValue(unmasked);
+      if (lastMaskedOp.target === 'original') {
+        setOriginalSql(unmasked);
+        setDisplayOriginal(unmasked);
+      } else {
+        setModifiedSql(unmasked);
+        setDisplayModified(unmasked);
+      }
+    }
+    setProtectedSecrets([]);
+    setLastMaskedOp(null);
+    addToast('Secrets Unmasked', 'Reverted back to raw original values', 'info');
+  }, [lastMaskedOp, addToast]);
 
   const detailedDiff = useMemo(() => {
     return computeDetailedDiff(displayOriginal, displayModified, {
@@ -346,6 +455,15 @@ export default function SqlCompare() {
         onExportHtml={handleExportHtml}
         onCopyChangelog={handleCopyMarkdown}
         activeHunkId={activeHunkId}
+      />
+
+      <SecretShieldModal
+        isOpen={isShieldModalOpen}
+        onClose={() => setIsShieldModalOpen(false)}
+        secrets={protectedSecrets}
+        onUnmask={lastMaskedOp ? handleUnmask : undefined}
+        autoMaskEnabled={autoMaskSecrets}
+        onToggleAutoMask={handleToggleAutoMask}
       />
       {/* SQL Compare Settings Toolbar */}
       <div className="card flex flex-col overflow-hidden border-2 border-zinc-200 dark:border-zinc-800 shrink-0">
@@ -502,6 +620,23 @@ export default function SqlCompare() {
 
           {/* Navigator & Match status */}
           <div className="flex items-center gap-3">
+            {/* Secret Shield Status Pill */}
+            <button
+              onClick={() => setIsShieldModalOpen(true)}
+              className={`btn-spring flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-mono font-bold border transition-all ${
+                protectedSecrets.length > 0
+                  ? 'bg-orange-500/10 text-[#ff6b00] border-orange-500/40 shadow-xs animate-pulse'
+                  : 'bg-white dark:bg-zinc-800 text-zinc-500 border-zinc-200 dark:border-zinc-700 hover:text-zinc-900 dark:hover:text-white'
+              }`}
+              title="Secret Shield: Protects credentials, tokens & connection strings on paste"
+            >
+              <Shield size={12} className={protectedSecrets.length > 0 ? 'text-[#ff6b00]' : 'text-zinc-400'} />
+              <span className="hidden sm:inline">Shield</span>
+              <span className="text-[10px] px-1 rounded bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300">
+                {protectedSecrets.length > 0 ? `${protectedSecrets.length} Masked` : (autoMaskSecrets ? 'ON' : 'OFF')}
+              </span>
+            </button>
+
             <div className="flex items-center bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg p-0.5 shadow-2xs">
               <button
                 onClick={handlePrevDiff}
