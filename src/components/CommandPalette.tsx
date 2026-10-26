@@ -279,6 +279,18 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
 
     // Actions
     {
+      id: 'action-inspect',
+      title: 'Inspect What Changed',
+      subtitle: 'Open detailed hunk and token breakdown of current diff',
+      category: 'Actions',
+      icon: Sparkles,
+      action: () => {
+        onNavigateTab('diff');
+        onClose();
+      },
+      keywords: ['inspect', 'what changed', 'breakdown', 'tokens', 'hunk', 'details']
+    },
+    {
       id: 'action-theme',
       title: currentTheme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode',
       subtitle: currentTheme === 'dark' ? 'Industrial White interface' : 'Carbon Slate interface',

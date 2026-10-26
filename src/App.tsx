@@ -236,25 +236,25 @@ function App() {
         {/* Main Workspace Display Area */}
         <main className="content-pane relative z-10 flex-1 overflow-hidden px-6 py-4 md:px-10 md:py-5 min-h-0 flex flex-col">
           <div className="max-w-[1600px] mx-auto w-full flex-1 flex flex-col min-h-0">
-            <div className={activeTab === 'diff' ? 'flex flex-col flex-1 min-h-0' : 'hidden'}>
+            <div className={activeTab === 'diff' ? 'flex flex-col flex-1 min-h-0 animate-tab-switch' : 'hidden'}>
               <CodeDiff />
             </div>
-            <div className={activeTab === 'sql-compare' ? 'flex flex-col flex-1 min-h-0' : 'hidden'}>
+            <div className={activeTab === 'sql-compare' ? 'flex flex-col flex-1 min-h-0 animate-tab-switch' : 'hidden'}>
               <SqlCompare />
             </div>
-            <div className={activeTab === 'beautifier' ? 'flex flex-col flex-1 min-h-0' : 'hidden'}>
+            <div className={activeTab === 'beautifier' ? 'flex flex-col flex-1 min-h-0 animate-tab-switch' : 'hidden'}>
               <Beautifier />
             </div>
-            <div className={activeTab === 'markdown' ? 'flex flex-col flex-1 min-h-0' : 'hidden'}>
+            <div className={activeTab === 'markdown' ? 'flex flex-col flex-1 min-h-0 animate-tab-switch' : 'hidden'}>
               <MarkdownStudio />
             </div>
-            <div className={activeTab === 'toolbox' ? 'flex flex-col flex-1 min-h-0' : 'hidden'}>
+            <div className={activeTab === 'toolbox' ? 'flex flex-col flex-1 min-h-0 animate-tab-switch' : 'hidden'}>
               <DevToolbox initialTool={toolboxInitialTool} />
             </div>
-            <div className={activeTab === 'destress' ? 'flex flex-col flex-1 min-h-0' : 'hidden'}>
+            <div className={activeTab === 'destress' ? 'flex flex-col flex-1 min-h-0 animate-tab-switch' : 'hidden'}>
               <DestressZone />
             </div>
-            <div className={activeTab === 'feature-request' ? 'flex flex-col flex-1 min-h-0' : 'hidden'}>
+            <div className={activeTab === 'feature-request' ? 'flex flex-col flex-1 min-h-0 animate-tab-switch' : 'hidden'}>
               <FeatureRequest />
             </div>
           </div>

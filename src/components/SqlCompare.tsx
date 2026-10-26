@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useMemo } from 'react';
+import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { DiffEditor } from '@monaco-editor/react';
 import { format } from 'sql-formatter';
 import { 
@@ -7,19 +7,25 @@ import {
   ArrowLeftRight, 
   Copy, 
   Check, 
-  Sparkles,
+  Sparkles, 
   EyeOff,
   Sliders,
   Share2,
-  Download
+  Download,
+  ChevronLeft,
+  ChevronRight,
+  FileCode2
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import EditorSkeleton from './EditorSkeleton';
+import ChangeInspector from './ChangeInspector';
+import ToastContainer, { type ToastMessage } from './Toast';
 import { 
-  computeDiffStats, 
-  generateMarkdownDiff, 
+  computeDetailedDiff, 
   downloadPatchFile, 
-  encodeDiffShare 
+  downloadHtmlReport,
+  encodeDiffShare,
+  type DiffHunk
 } from '../utils/diffUtils';
 
 const SQL_DIALECTS = [
@@ -225,16 +231,82 @@ export default function SqlCompare() {
     }
   };
 
-  const [copiedShare, setCopiedShare] = useState(false);
-  const [copiedMarkdown, setCopiedMarkdown] = useState(false);
+  const [isInspectorOpen, setIsInspectorOpen] = useState(false);
+  const [activeHunkIndex, setActiveHunkIndex] = useState(0);
+  const [activeHunkId, setActiveHunkId] = useState<string | null>(null);
+  const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
-  const diffStats = useMemo(() => {
-    return computeDiffStats(displayOriginal, displayModified);
-  }, [displayOriginal, displayModified]);
+  const addToast = useCallback((title: string, message?: string, type: 'success' | 'info' | 'warning' = 'success') => {
+    const id = `${Date.now()}-${Math.random()}`;
+    setToasts(prev => [...prev, { id, title, message, type }]);
+  }, []);
 
-  const copyToClipboard = (text: string, setCopied: (v: boolean) => void) => {
+  const dismissToast = useCallback((id: string) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  }, []);
+
+  const detailedDiff = useMemo(() => {
+    return computeDetailedDiff(displayOriginal, displayModified, {
+      language: 'sql',
+      ignoreWhitespace
+    });
+  }, [displayOriginal, displayModified, ignoreWhitespace]);
+
+  const diffStats = detailedDiff.stats;
+  const hunks = detailedDiff.hunks;
+
+  const handleJumpToHunk = useCallback((hunk: DiffHunk) => {
+    if (!diffEditorRef.current) return;
+    const origEditor = diffEditorRef.current.getOriginalEditor();
+    const modEditor = diffEditorRef.current.getModifiedEditor();
+    if (hunk.origStartLine > 0 && origEditor) {
+      origEditor.revealLineInCenter(hunk.origStartLine);
+      origEditor.setPosition({ lineNumber: hunk.origStartLine, column: 1 });
+    }
+    if (hunk.modStartLine > 0 && modEditor) {
+      modEditor.revealLineInCenter(hunk.modStartLine);
+      modEditor.setPosition({ lineNumber: hunk.modStartLine, column: 1 });
+    }
+    setActiveHunkId(hunk.id);
+  }, []);
+
+  const handleNextDiff = useCallback(() => {
+    if (hunks.length === 0) return;
+    const nextIdx = (activeHunkIndex + 1) % hunks.length;
+    setActiveHunkIndex(nextIdx);
+    handleJumpToHunk(hunks[nextIdx]);
+  }, [activeHunkIndex, hunks, handleJumpToHunk]);
+
+  const handlePrevDiff = useCallback(() => {
+    if (hunks.length === 0) return;
+    const prevIdx = (activeHunkIndex - 1 + hunks.length) % hunks.length;
+    setActiveHunkIndex(prevIdx);
+    handleJumpToHunk(hunks[prevIdx]);
+  }, [activeHunkIndex, hunks, handleJumpToHunk]);
+
+  // Keyboard shortcut listener for F7 / Shift+F7 to navigate differences
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'F7') {
+        e.preventDefault();
+        if (e.shiftKey) {
+          handlePrevDiff();
+        } else {
+          handleNextDiff();
+        }
+      }
+      if (e.key === 'Escape' && isInspectorOpen) {
+        setIsInspectorOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleNextDiff, handlePrevDiff, isInspectorOpen]);
+
+  const copyToClipboard = (text: string, setCopied: (v: boolean) => void, label = 'Copied') => {
     navigator.clipboard.writeText(text);
     setCopied(true);
+    addToast('Copied to Clipboard', label, 'success');
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -242,25 +314,39 @@ export default function SqlCompare() {
     const encoded = encodeDiffShare(displayOriginal, displayModified, 'sql');
     const url = `${window.location.origin}${window.location.pathname}#diff=${encoded}`;
     navigator.clipboard.writeText(url);
-    setCopiedShare(true);
-    setTimeout(() => setCopiedShare(false), 2200);
+    addToast('Share Link Copied', 'URL with encoded SQL is in your clipboard', 'success');
   };
 
   const handleCopyMarkdown = () => {
-    const md = generateMarkdownDiff(displayOriginal, displayModified, 'queries.sql');
-    navigator.clipboard.writeText(md);
-    setCopiedMarkdown(true);
-    setTimeout(() => setCopiedMarkdown(false), 2200);
+    navigator.clipboard.writeText(detailedDiff.markdownChangelog);
+    addToast('PR Changelog Copied', 'Markdown formatted summary ready for PR', 'success');
   };
 
   const handleDownloadPatch = () => {
     downloadPatchFile(displayOriginal, displayModified, `align_sql_${Date.now()}.patch`);
+    addToast('Downloaded .patch', 'Standard unified patch file saved', 'success');
+  };
+
+  const handleExportHtml = () => {
+    downloadHtmlReport(displayOriginal, displayModified, `sql_diff_${dialect}_report.html`, 'sql');
+    addToast('Exported HTML Report', 'Self-contained SQL diff report downloaded', 'success');
   };
 
   const isIdentical = displayOriginal.trim() === displayModified.trim();
 
   return (
-    <div className="animate-fade-in flex flex-col gap-3.5 flex-1 min-h-0">
+    <div className="animate-fade-in flex flex-col gap-3.5 flex-1 min-h-0 relative">
+      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
+
+      <ChangeInspector
+        isOpen={isInspectorOpen}
+        onClose={() => setIsInspectorOpen(false)}
+        detailedDiff={detailedDiff}
+        onJumpToHunk={handleJumpToHunk}
+        onExportHtml={handleExportHtml}
+        onCopyChangelog={handleCopyMarkdown}
+        activeHunkId={activeHunkId}
+      />
       {/* SQL Compare Settings Toolbar */}
       <div className="card flex flex-col overflow-hidden border-2 border-zinc-200 dark:border-zinc-800 shrink-0">
         <div className="p-4 flex flex-wrap items-center justify-between gap-4 border-b-2 border-zinc-200 dark:border-zinc-800">
@@ -318,31 +404,49 @@ export default function SqlCompare() {
           </div>
 
           <div className="flex items-center gap-2.5 flex-wrap">
-            <button 
-              onClick={formatInputsInPlace} 
-              className="btn-primary py-1.5 px-3.5 btn-spring text-xs"
-              title="Auto-format and clean original inputs"
+            <button
+              onClick={() => setIsInspectorOpen(true)}
+              className="btn-primary py-1.5 px-3 btn-spring flex items-center gap-1.5 animate-pulse-glow"
+              title="Inspect What Changed in SQL"
             >
               <Sparkles size={13} />
+              <span className="text-xs font-extrabold">What Changed ({hunks.length})</span>
+            </button>
+
+            <button 
+              onClick={formatInputsInPlace} 
+              className="btn-secondary py-1.5 px-3 btn-spring text-xs flex items-center gap-1.5"
+              title="Auto-format and clean original inputs"
+            >
+              <Sparkles size={13} className="text-[#ff6b00]" />
               <span>Format & Align</span>
             </button>
 
             <button 
               onClick={handleShareLink} 
-              className="btn-secondary py-1.5 px-3 btn-spring flex items-center gap-1.5"
+              className="btn-secondary py-1.5 px-2.5 btn-spring flex items-center gap-1.5"
               title="Create shareable compressed URL link"
             >
-              {copiedShare ? <Check size={13} className="text-green-600" /> : <Share2 size={13} className="text-[#ff6b00]" />}
-              <span className="text-xs">{copiedShare ? 'Link Copied!' : 'Share Diff'}</span>
+              <Share2 size={13} className="text-[#ff6b00]" />
+              <span className="text-xs hidden sm:inline">Share</span>
             </button>
 
             <button 
               onClick={handleCopyMarkdown} 
-              className="btn-secondary py-1.5 px-3 btn-spring flex items-center gap-1.5"
+              className="btn-secondary py-1.5 px-2.5 btn-spring flex items-center gap-1.5"
               title="Copy GitHub Markdown diff for PRs"
             >
-              {copiedMarkdown ? <Check size={13} className="text-green-600" /> : <Copy size={13} />}
-              <span className="text-xs">{copiedMarkdown ? 'Copied MD!' : 'Copy for PR'}</span>
+              <Copy size={13} />
+              <span className="text-xs hidden sm:inline">Copy PR</span>
+            </button>
+
+            <button 
+              onClick={handleExportHtml} 
+              className="btn-secondary py-1.5 px-2.5 btn-spring flex items-center gap-1.5"
+              title="Download standalone interactive HTML SQL diff report"
+            >
+              <FileCode2 size={13} className="text-[#ff6b00]" />
+              <span className="text-xs hidden md:inline">HTML Report</span>
             </button>
 
             <button 
@@ -353,9 +457,8 @@ export default function SqlCompare() {
               <Download size={13} />
             </button>
             
-            <button onClick={handleSwap} className="btn-secondary py-1.5 px-3 btn-spring" title="Swap Panels">
+            <button onClick={handleSwap} className="btn-secondary py-1.5 px-2.5 btn-spring" title="Swap Panels">
               <ArrowLeftRight size={13} />
-              <span className="text-xs">Swap</span>
             </button>
             
             <button onClick={handleClear} className="btn-secondary py-1.5 px-2.5 btn-spring text-red-600 hover:text-red-700 hover:border-red-300 hover:bg-red-50/20" title="Clear All">
@@ -374,7 +477,7 @@ export default function SqlCompare() {
                 <span className="font-extrabold text-[#ff6b00]">{diffStats.similarity}%</span>
                 <div className="w-16 h-1.5 bg-zinc-200 dark:bg-zinc-700 rounded-full overflow-hidden">
                   <div 
-                    className={`h-full ${diffStats.similarity === 100 ? 'bg-green-500' : 'bg-[#ff6b00]'}`}
+                    className={`h-full transition-all duration-500 ease-out ${diffStats.similarity === 100 ? 'bg-green-500' : 'bg-[#ff6b00]'}`}
                     style={{ width: `${diffStats.similarity}%` }}
                   />
                 </div>
@@ -397,19 +500,45 @@ export default function SqlCompare() {
             </div>
           </div>
 
-          {/* Match status indicator */}
-          <div className="flex items-center gap-1.5">
-            {isIdentical ? (
-              <span className="inline-flex items-center gap-1 text-green-600 dark:text-green-400 font-bold text-[11px]">
-                <Sparkles size={12} />
-                Queries Identical
+          {/* Navigator & Match status */}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg p-0.5 shadow-2xs">
+              <button
+                onClick={handlePrevDiff}
+                disabled={hunks.length === 0}
+                className="p-1 px-1.5 text-zinc-600 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                title="Previous Difference (Shift + F7)"
+              >
+                <ChevronLeft size={13} />
+              </button>
+
+              <span className="text-[11px] font-mono font-bold px-2 text-zinc-600 dark:text-zinc-400">
+                {hunks.length > 0 ? `${activeHunkIndex + 1} of ${hunks.length}` : '0 Diffs'}
               </span>
-            ) : (
-              <span className="inline-flex items-center gap-1 text-[#ff6b00] font-bold text-[11px]">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#ff6b00] animate-pulse" />
-                Query Differences Detected
-              </span>
-            )}
+
+              <button
+                onClick={handleNextDiff}
+                disabled={hunks.length === 0}
+                className="p-1 px-1.5 text-zinc-600 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                title="Next Difference (F7)"
+              >
+                <ChevronRight size={13} />
+              </button>
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              {isIdentical ? (
+                <span className="inline-flex items-center gap-1 text-green-600 dark:text-green-400 font-bold text-[11px]">
+                  <Sparkles size={12} />
+                  Queries Identical
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 text-[#ff6b00] font-bold text-[11px]">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#ff6b00] animate-pulse" />
+                  {hunks.length} Differences
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
