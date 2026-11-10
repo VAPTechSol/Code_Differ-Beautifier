@@ -71,11 +71,40 @@
 
 /* Global resets, smooth theme transitions, and body styling */
 html, body, #root {
-  height: 100vh;
+  height: 100%;
+  min-height: 100dvh;
   margin: 0;
   padding: 0;
   overflow: hidden;
   background-color: var(--bg-app);
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Safe area insets for mobile devices (iPhone notch, dynamic island, navigation bar) */
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.pl-safe {
+  padding-left: env(safe-area-inset-left, 0px);
+}
+.pr-safe {
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
+/* Touch and mobile scroll utilities */
+.touch-scroll {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 body {
