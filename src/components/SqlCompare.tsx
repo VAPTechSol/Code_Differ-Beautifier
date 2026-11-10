@@ -15,7 +15,9 @@ import {
   ChevronLeft,
   ChevronRight,
   FileCode2,
-  Shield
+  Shield,
+  Columns,
+  Rows
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import EditorSkeleton from './EditorSkeleton';
@@ -45,6 +47,20 @@ const SQL_DIALECTS = [
 
 export default function SqlCompare() {
   const { theme } = useTheme();
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const [splitView, setSplitView] = useState(() => {
+    const saved = localStorage.getItem('kollidr-sql-split');
+    if (saved !== null) return saved !== 'false';
+    return typeof window !== 'undefined' && window.innerWidth >= 768;
+  });
+
   const [dialect, setDialect] = useState<'sql' | 'mysql' | 'postgresql' | 'plsql' | 'tsql'>(() => {
     return (localStorage.getItem('kollidr-sql-dialect') as any) || 'sql';
   });
@@ -482,6 +498,43 @@ export default function SqlCompare() {
               </select>
             </div>
 
+            {/* Layout Split / Unified Toggle */}
+            <div className="flex flex-col gap-1">
+              <span className="text-xs font-mono font-bold text-zinc-400 uppercase tracking-wider">Layout</span>
+              <div className="flex bg-zinc-100/80 dark:bg-zinc-800/80 border-2 border-zinc-200 dark:border-zinc-700 rounded-lg p-0.5">
+                <button 
+                  onClick={() => {
+                    setSplitView(true);
+                    localStorage.setItem('kollidr-sql-split', 'true');
+                  }}
+                  className={`p-1 px-2.5 rounded-md transition-all btn-spring flex items-center justify-center gap-1.5 ${
+                    splitView 
+                      ? 'bg-zinc-950 dark:bg-zinc-100 text-white dark:text-zinc-950 font-bold border border-black dark:border-zinc-200 shadow-sm' 
+                      : 'text-zinc-500 hover:text-zinc-950 dark:hover:text-white border border-transparent'
+                  }`}
+                  title="Side-by-side Split View"
+                >
+                  <Columns size={13} />
+                  <span className="text-[10px] font-bold font-mono">Split</span>
+                </button>
+                <button 
+                  onClick={() => {
+                    setSplitView(false);
+                    localStorage.setItem('kollidr-sql-split', 'false');
+                  }}
+                  className={`p-1 px-2.5 rounded-md transition-all btn-spring flex items-center justify-center gap-1.5 ${
+                    !splitView 
+                      ? 'bg-zinc-950 dark:bg-zinc-100 text-white dark:text-zinc-950 font-bold border border-black dark:border-zinc-200 shadow-sm' 
+                      : 'text-zinc-500 hover:text-zinc-950 dark:hover:text-white border border-transparent'
+                  }`}
+                  title="Unified Inline View"
+                >
+                  <Rows size={13} />
+                  <span className="text-[10px] font-bold font-mono">Unified</span>
+                </button>
+              </div>
+            </div>
+
             {/* Core Rules Checkboxes */}
             <div className="flex items-center gap-5 pt-2 md:pt-0">
               <label className="flex items-center gap-2.5 text-xs font-mono font-bold text-zinc-700 dark:text-zinc-300 cursor-pointer select-none">
@@ -831,11 +884,11 @@ export default function SqlCompare() {
           options={{
             originalEditable: true,
             readOnly: false,
-            renderSideBySide: true,
-            minimap: { enabled: true },
+            renderSideBySide: splitView,
+            minimap: { enabled: !isMobile },
             scrollBeyondLastLine: false,
-            fontSize: 12,
-            lineHeight: 18,
+            fontSize: isMobile ? 11 : 12,
+            lineHeight: isMobile ? 16 : 18,
             fontFamily: "'JetBrains Mono', monospace",
             automaticLayout: true,
             ignoreTrimWhitespace: ignoreWhitespace,

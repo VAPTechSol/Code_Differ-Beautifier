@@ -527,7 +527,7 @@ export default function DevToolbox({ initialTool = 'json' }: DevToolboxProps) {
         </div>
 
         {/* Tab Pills */}
-        <div className="flex flex-wrap items-center gap-1.5 bg-zinc-100 dark:bg-zinc-800 p-1 rounded-xl border border-zinc-200 dark:border-zinc-700">
+        <div className="flex items-center gap-1.5 bg-zinc-100 dark:bg-zinc-800 p-1 rounded-xl border border-zinc-200 dark:border-zinc-700 overflow-x-auto scrollbar-none flex-nowrap w-full touch-scroll">
           {toolTabs.map(tab => {
             const Icon = tab.icon;
             const isActive = activeTool === tab.id;
@@ -538,7 +538,7 @@ export default function DevToolbox({ initialTool = 'json' }: DevToolboxProps) {
                   setActiveTool(tab.id);
                   setStatusMsg('');
                 }}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all btn-spring ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all btn-spring shrink-0 ${
                   isActive
                     ? 'bg-[#ff6b00] text-white shadow-sm'
                     : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white'

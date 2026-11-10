@@ -79,7 +79,9 @@ export const MarkdownStudio: React.FC = () => {
   const [content, setContent] = useState<string>(() => {
     return localStorage.getItem('align-markdown-draft') || SAMPLE_MARKDOWN;
   });
-  const [viewMode, setViewMode] = useState<ViewMode>('split');
+  const [viewMode, setViewMode] = useState<ViewMode>(() => {
+    return typeof window !== 'undefined' && window.innerWidth < 768 ? 'editor' : 'split';
+  });
   const [copiedMd, setCopiedMd] = useState(false);
   const [copiedHtml, setCopiedHtml] = useState(false);
 

@@ -18,7 +18,8 @@ import {
   Regex,
   ListOrdered,
   FileArchive,
-  Lightbulb
+  Lightbulb,
+  X
 } from 'lucide-react';
 
 export interface CommandItem {
@@ -376,9 +377,16 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
             className="flex-1 bg-transparent border-none outline-none text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 font-mono text-xs sm:text-sm font-semibold"
           />
           <div className="flex items-center gap-1.5 shrink-0">
-            <kbd className="px-1.5 py-0.5 text-[10px] font-mono font-bold bg-zinc-200 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded text-zinc-600 dark:text-zinc-400">
+            <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-mono font-bold bg-zinc-200 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded text-zinc-600 dark:text-zinc-400">
               ESC
             </kbd>
+            <button
+              onClick={onClose}
+              className="sm:hidden p-1 text-zinc-400 hover:text-zinc-900 dark:hover:text-white rounded"
+              title="Close (ESC)"
+            >
+              <X size={16} />
+            </button>
           </div>
         </div>
 

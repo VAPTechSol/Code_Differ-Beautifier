@@ -80,6 +80,15 @@ const INITIAL_CODES: Record<string, string> = {
 
 export default function Beautifier() {
   const { theme } = useTheme();
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
+  const [mobileViewTab, setMobileViewTab] = useState<'input' | 'output'>('input');
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const [language, setLanguage] = useState('javascript');
   const [indentSize, setIndentSize] = useState(2);
   const [indentWithTabs, setIndentWithTabs] = useState(false);
@@ -366,6 +375,9 @@ export default function Beautifier() {
         }
 
         setOutputCode(result);
+        if (window.innerWidth < 768) {
+          setMobileViewTab('output');
+        }
         
         // Pick a random funny success phrase
         const phrase = successPhrases[Math.floor(Math.random() * successPhrases.length)];
@@ -699,6 +711,31 @@ export default function Beautifier() {
         </div>
       )}
 
+      {/* Mobile Tab Segmented Switcher (Visible only on < md) */}
+      <div className="flex md:hidden items-center bg-zinc-100 dark:bg-zinc-800 p-1 rounded-xl border border-zinc-200 dark:border-zinc-700 shrink-0 select-none">
+        <button
+          onClick={() => setMobileViewTab('input')}
+          className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-mono font-bold transition-all text-center ${
+            mobileViewTab === 'input' 
+              ? 'bg-[#ff6b00] text-white shadow-xs' 
+              : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
+          }`}
+        >
+          Raw Input Code
+        </button>
+        <button
+          onClick={() => setMobileViewTab('output')}
+          className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-mono font-bold transition-all text-center flex items-center justify-center gap-1 ${
+            mobileViewTab === 'output' 
+              ? 'bg-[#ff6b00] text-white shadow-xs' 
+              : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
+          }`}
+        >
+          <span>Beautified Output</span>
+          {outputCode && <span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block"></span>}
+        </button>
+      </div>
+
       {/* Editor Panels */}
       <div 
         ref={containerRef}
@@ -706,8 +743,10 @@ export default function Beautifier() {
       >
         {/* Input Panel */}
         <div 
-          style={{ width: window.innerWidth >= 768 ? `${splitWidth}%` : '100%' }}
-          className="card dark-editor-card flex flex-col overflow-hidden min-w-0"
+          style={{ width: !isMobile ? `${splitWidth}%` : '100%' }}
+          className={`card dark-editor-card flex flex-col overflow-hidden min-w-0 ${
+            isMobile && mobileViewTab !== 'input' ? 'hidden md:flex' : 'flex'
+          }`}
         >
           <div className="border-b-2 border-zinc-200 dark:border-zinc-800 p-2.5 px-4 dark-terminal-header flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -721,7 +760,7 @@ export default function Beautifier() {
             
             {/* Quick Presets */}
             <div className="flex items-center gap-2">
-              <span className="text-[9px] font-mono font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mr-1">Scramble Samples:</span>
+              <span className="text-[9px] font-mono font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mr-1 hidden sm:inline">Scramble Samples:</span>
               <button 
                 onClick={() => loadPreset('js')} 
                 className="btn-terminal btn-spring py-0.5 px-2 text-[9px] font-mono font-bold"
@@ -752,8 +791,8 @@ export default function Beautifier() {
               theme={theme === 'dark' ? 'vs-dark' : 'vs'}
               options={{
                 minimap: { enabled: false },
-                fontSize: 12,
-                lineHeight: 18,
+                fontSize: isMobile ? 11 : 12,
+                lineHeight: isMobile ? 16 : 18,
                 fontFamily: "'JetBrains Mono', monospace",
                 automaticLayout: true,
                 scrollBeyondLastLine: false,
@@ -781,8 +820,10 @@ export default function Beautifier() {
 
         {/* Output Panel */}
         <div 
-          style={{ width: window.innerWidth >= 768 ? `${100 - splitWidth}%` : '100%' }}
-          className="card dark-editor-card flex flex-col overflow-hidden min-w-0"
+          style={{ width: !isMobile ? `${100 - splitWidth}%` : '100%' }}
+          className={`card dark-editor-card flex flex-col overflow-hidden min-w-0 ${
+            isMobile && mobileViewTab !== 'output' ? 'hidden md:flex' : 'flex'
+          }`}
         >
           <div className="border-b-2 border-zinc-200 dark:border-zinc-800 p-2.5 px-4 dark-terminal-header flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -809,7 +850,7 @@ export default function Beautifier() {
                 title="Download formatted file"
               >
                 <Download size={12} />
-                <span className="ml-1">Download</span>
+                <span className="ml-1 hidden sm:inline">Download</span>
               </button>
             </div>
           </div>
@@ -822,9 +863,9 @@ export default function Beautifier() {
               theme={theme === 'dark' ? 'vs-dark' : 'vs'}
               options={{
                 readOnly: true,
-                minimap: { enabled: true },
-                fontSize: 12,
-                lineHeight: 18,
+                minimap: { enabled: !isMobile },
+                fontSize: isMobile ? 11 : 12,
+                lineHeight: isMobile ? 16 : 18,
                 fontFamily: "'JetBrains Mono', monospace",
                 automaticLayout: true,
                 scrollBeyondLastLine: false,

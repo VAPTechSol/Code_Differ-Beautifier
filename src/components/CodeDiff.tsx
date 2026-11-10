@@ -190,11 +190,21 @@ ORDER BY total_revenue DESC;`
 
 export default function CodeDiff() {
   const { theme } = useTheme();
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const [language, setLanguage] = useState(() => {
     return localStorage.getItem('align-diff-language') || 'javascript';
   });
   const [splitView, setSplitView] = useState(() => {
-    return localStorage.getItem('align-diff-split') !== 'false';
+    const saved = localStorage.getItem('align-diff-split');
+    if (saved !== null) return saved !== 'false';
+    return typeof window !== 'undefined' && window.innerWidth >= 768;
   });
   const [ignoreWhitespace, setIgnoreWhitespace] = useState(false);
   const [ignoreCase, setIgnoreCase] = useState(false);
@@ -640,7 +650,10 @@ export default function CodeDiff() {
             <span className="text-xs font-mono font-bold text-zinc-400 uppercase tracking-wider">Layout</span>
             <div className="flex bg-zinc-100/80 dark:bg-zinc-800/80 border-2 border-zinc-200 dark:border-zinc-700 rounded-lg p-0.5">
               <button 
-                onClick={() => setSplitView(true)}
+                onClick={() => {
+                  setSplitView(true);
+                  localStorage.setItem('align-diff-split', 'true');
+                }}
                 className={`p-1 px-2.5 rounded-md transition-all btn-spring flex items-center justify-center gap-1.5 ${
                   splitView 
                     ? 'bg-zinc-950 dark:bg-zinc-100 text-white dark:text-zinc-950 font-bold border border-black dark:border-zinc-200 shadow-sm' 
@@ -652,7 +665,10 @@ export default function CodeDiff() {
                 <span className="text-[10px] font-bold font-mono">Split</span>
               </button>
               <button 
-                onClick={() => setSplitView(false)}
+                onClick={() => {
+                  setSplitView(false);
+                  localStorage.setItem('align-diff-split', 'false');
+                }}
                 className={`p-1 px-2.5 rounded-md transition-all btn-spring flex items-center justify-center gap-1.5 ${
                   !splitView 
                     ? 'bg-zinc-950 dark:bg-zinc-100 text-white dark:text-zinc-950 font-bold border border-black dark:border-zinc-200 shadow-sm' 
@@ -947,10 +963,10 @@ export default function CodeDiff() {
             originalEditable: true,
             readOnly: false,
             renderSideBySide: splitView,
-            minimap: { enabled: true },
+            minimap: { enabled: !isMobile },
             scrollBeyondLastLine: false,
-            fontSize: 12,
-            lineHeight: 18,
+            fontSize: isMobile ? 11 : 12,
+            lineHeight: isMobile ? 16 : 18,
             fontFamily: "'JetBrains Mono', monospace",
             automaticLayout: true,
             ignoreTrimWhitespace: ignoreWhitespace,
