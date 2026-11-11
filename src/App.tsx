@@ -435,7 +435,7 @@ function App() {
         <div className="absolute inset-0 dot-pattern pointer-events-none z-0 opacity-85"></div>
 
         {/* Main Workspace Display Area */}
-        <main className="content-pane relative z-10 flex-1 overflow-y-auto md:overflow-hidden px-2.5 py-2.5 sm:px-4 sm:py-3 md:px-8 md:py-4 min-h-0 flex flex-col touch-scroll">
+        <main className="content-pane relative z-10 flex-1 overflow-hidden px-2 py-2 sm:px-4 sm:py-3 md:px-8 md:py-4 min-h-0 flex flex-col">
           <div className="max-w-[1600px] mx-auto w-full flex-1 flex flex-col min-h-0">
             <div className={activeTab === 'diff' ? 'flex flex-col flex-1 min-h-0 animate-tab-switch' : 'hidden'}>
               <CodeDiff />

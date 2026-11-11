@@ -15,6 +15,7 @@ import { useTheme } from '../context/ThemeContext';
 import EditorSkeleton from './EditorSkeleton';
 import SecretShieldModal from './SecretShieldModal';
 import ToastContainer, { type ToastMessage } from './Toast';
+import MobileCodeEditor from './MobileCodeEditor';
 import { detectAndMaskSecrets, unmaskSecrets, type DetectedSecret } from '../utils/secretDetector';
 
 const LANGUAGES = [
@@ -736,147 +737,169 @@ export default function Beautifier() {
         </button>
       </div>
 
-      {/* Editor Panels */}
-      <div 
-        ref={containerRef}
-        className={`flex flex-col md:flex-row gap-2.5 flex-1 min-h-0 relative ${isDragging ? 'select-none' : ''}`}
-      >
-        {/* Input Panel */}
-        <div 
-          style={{ width: !isMobile ? `${splitWidth}%` : '100%' }}
-          className={`card dark-editor-card flex flex-col overflow-hidden min-w-0 ${
-            isMobile && mobileViewTab !== 'input' ? 'hidden md:flex' : 'flex'
-          }`}
-        >
-          <div className="border-b-2 border-zinc-200 dark:border-zinc-800 p-2.5 px-4 dark-terminal-header flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="hidden sm:flex items-center gap-1.5 mr-1">
-                <span className="window-dot window-dot-red"></span>
-                <span className="window-dot window-dot-yellow"></span>
-                <span className="window-dot window-dot-green"></span>
-              </div>
-              <span className="font-bold text-xs uppercase tracking-wider font-mono">Raw Input Code</span>
-            </div>
-            
-            {/* Quick Presets */}
-            <div className="flex items-center gap-2">
-              <span className="text-[9px] font-mono font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mr-1 hidden sm:inline">Scramble Samples:</span>
-              <button 
-                onClick={() => loadPreset('js')} 
-                className="btn-terminal btn-spring py-0.5 px-2 text-[9px] font-mono font-bold"
-              >
-                JS
-              </button>
-              <button 
-                onClick={() => loadPreset('sql')} 
-                className="btn-terminal btn-spring py-0.5 px-2 text-[9px] font-mono font-bold"
-              >
-                SQL
-              </button>
-              <button 
-                onClick={() => loadPreset('html')} 
-                className="btn-terminal btn-spring py-0.5 px-2 text-[9px] font-mono font-bold"
-              >
-                HTML
-              </button>
-            </div>
-          </div>
-          <div className="flex-1 overflow-hidden">
-            <Editor
-              height="100%"
-              language={language === 'typescript' ? 'typescript' : language === 'json' ? 'json' : language}
+      {/* Mobile Workspace vs Desktop Monaco Workspace */}
+      {isMobile ? (
+        <div className="flex flex-col flex-1 min-h-0">
+          {mobileViewTab === 'input' ? (
+            <MobileCodeEditor
+              title="Raw Input Code"
               value={inputCode}
-              onMount={handleInputMount}
-              loading={<EditorSkeleton label="Initializing Formatter Input..." />}
-              theme={theme === 'dark' ? 'vs-dark' : 'vs'}
-              options={{
-                minimap: { enabled: false },
-                fontSize: isMobile ? 11 : 12,
-                lineHeight: isMobile ? 16 : 18,
-                fontFamily: "'JetBrains Mono', monospace",
-                automaticLayout: true,
-                scrollBeyondLastLine: false,
-                wordWrap: 'on',
-                tabSize: indentSize,
-                insertSpaces: !indentWithTabs,
-                padding: { top: 8, bottom: 8 }
+              onChange={setInputCode}
+              language={language}
+              placeholder="Paste or type code here to beautify..."
+              onFileUpload={(content) => {
+                setInputCode(content);
+                addToast('File Loaded', 'Code ready to beautify', 'success');
               }}
             />
-          </div>
+          ) : (
+            <MobileCodeEditor
+              title="Beautified Output"
+              value={outputCode || '// Click "Format Code" above to beautify your input'}
+              readOnly={true}
+              language={language}
+            />
+          )}
         </div>
-
-        {/* Draggable Divider Splitter */}
+      ) : (
+        /* Desktop Dual Monaco Editor Panels */
         <div 
-          onMouseDown={handleMouseDown}
-          className="hidden md:flex w-2.5 bg-zinc-100 hover:bg-[#ff6b00] active:bg-[#ff6b00] dark:bg-zinc-800 dark:hover:bg-[#ff6b00] dark:active:bg-[#ff6b00] cursor-col-resize transition-colors self-stretch rounded-full items-center justify-center relative z-20 group"
-          title="Drag to resize panels"
+          ref={containerRef}
+          className={`flex flex-col md:flex-row gap-2.5 flex-1 min-h-0 relative ${isDragging ? 'select-none' : ''}`}
         >
-          <div className="flex flex-col gap-1 pointer-events-none opacity-40 group-hover:opacity-100">
-            <span className="w-1.5 h-1.5 rounded-full bg-zinc-500 dark:bg-zinc-400"></span>
-            <span className="w-1.5 h-1.5 rounded-full bg-zinc-500 dark:bg-zinc-400"></span>
-            <span className="w-1.5 h-1.5 rounded-full bg-zinc-500 dark:bg-zinc-400"></span>
-          </div>
-        </div>
-
-        {/* Output Panel */}
-        <div 
-          style={{ width: !isMobile ? `${100 - splitWidth}%` : '100%' }}
-          className={`card dark-editor-card flex flex-col overflow-hidden min-w-0 ${
-            isMobile && mobileViewTab !== 'output' ? 'hidden md:flex' : 'flex'
-          }`}
-        >
-          <div className="border-b-2 border-zinc-200 dark:border-zinc-800 p-2.5 px-4 dark-terminal-header flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="hidden sm:flex items-center gap-1.5 mr-1">
-                <span className="window-dot window-dot-red"></span>
-                <span className="window-dot window-dot-yellow"></span>
-                <span className="window-dot window-dot-green"></span>
+          {/* Input Panel */}
+          <div 
+            style={{ width: `${splitWidth}%` }}
+            className="card dark-editor-card flex flex-col overflow-hidden min-w-0"
+          >
+            <div className="border-b-2 border-zinc-200 dark:border-zinc-800 p-2.5 px-4 dark-terminal-header flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="hidden sm:flex items-center gap-1.5 mr-1">
+                  <span className="window-dot window-dot-red"></span>
+                  <span className="window-dot window-dot-yellow"></span>
+                  <span className="window-dot window-dot-green"></span>
+                </div>
+                <span className="font-bold text-xs uppercase tracking-wider font-mono">Raw Input Code</span>
               </div>
-              <span className="font-bold text-xs uppercase tracking-wider font-mono">Beautified Output</span>
+              
+              {/* Quick Presets */}
+              <div className="flex items-center gap-2">
+                <span className="text-[9px] font-mono font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mr-1 hidden sm:inline">Scramble Samples:</span>
+                <button 
+                  onClick={() => loadPreset('js')} 
+                  className="btn-terminal btn-spring py-0.5 px-2 text-[9px] font-mono font-bold"
+                >
+                  JS
+                </button>
+                <button 
+                  onClick={() => loadPreset('sql')} 
+                  className="btn-terminal btn-spring py-0.5 px-2 text-[9px] font-mono font-bold"
+                >
+                  SQL
+                </button>
+                <button 
+                  onClick={() => loadPreset('html')} 
+                  className="btn-terminal btn-spring py-0.5 px-2 text-[9px] font-mono font-bold"
+                >
+                  HTML
+                </button>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <button 
-                onClick={copyOutput} 
-                disabled={!outputCode}
-                className="btn-terminal btn-spring disabled:opacity-40"
-              >
-                {copied ? <Check size={12} className="text-green-600 animate-bounce" /> : <Copy size={12} />}
-                <span className="ml-1">{copied ? 'Copied' : 'Copy'}</span>
-              </button>
-              <button 
-                onClick={downloadCode} 
-                disabled={!outputCode}
-                className="btn-terminal btn-spring disabled:opacity-40"
-                title="Download formatted file"
-              >
-                <Download size={12} />
-                <span className="ml-1 hidden sm:inline">Download</span>
-              </button>
+            <div className="flex-1 overflow-hidden">
+              <Editor
+                height="100%"
+                language={language === 'typescript' ? 'typescript' : language === 'json' ? 'json' : language}
+                value={inputCode}
+                onMount={handleInputMount}
+                loading={<EditorSkeleton label="Initializing Formatter Input..." />}
+                theme={theme === 'dark' ? 'vs-dark' : 'vs'}
+                options={{
+                  minimap: { enabled: false },
+                  fontSize: 12,
+                  lineHeight: 18,
+                  fontFamily: "'JetBrains Mono', monospace",
+                  automaticLayout: true,
+                  scrollBeyondLastLine: false,
+                  wordWrap: 'on',
+                  tabSize: indentSize,
+                  insertSpaces: !indentWithTabs,
+                  padding: { top: 8, bottom: 8 }
+                }}
+              />
             </div>
           </div>
-          <div className="flex-1 overflow-hidden">
-            <Editor
-              height="100%"
-              language={language === 'typescript' ? 'typescript' : language === 'json' ? 'json' : language}
-              value={outputCode}
-              loading={<EditorSkeleton label="Initializing Formatter Output..." />}
-              theme={theme === 'dark' ? 'vs-dark' : 'vs'}
-              options={{
-                readOnly: true,
-                minimap: { enabled: !isMobile },
-                fontSize: isMobile ? 11 : 12,
-                lineHeight: isMobile ? 16 : 18,
-                fontFamily: "'JetBrains Mono', monospace",
-                automaticLayout: true,
-                scrollBeyondLastLine: false,
-                wordWrap: 'on',
-                tabSize: indentSize,
-                padding: { top: 8, bottom: 8 }
-              }}
-            />
+
+          {/* Draggable Divider Splitter */}
+          <div 
+            onMouseDown={handleMouseDown}
+            className="hidden md:flex w-2.5 bg-zinc-100 hover:bg-[#ff6b00] active:bg-[#ff6b00] dark:bg-zinc-800 dark:hover:bg-[#ff6b00] dark:active:bg-[#ff6b00] cursor-col-resize transition-colors self-stretch rounded-full items-center justify-center relative z-20 group"
+            title="Drag to resize panels"
+          >
+            <div className="flex flex-col gap-1 pointer-events-none opacity-40 group-hover:opacity-100">
+              <span className="w-1.5 h-1.5 rounded-full bg-zinc-500 dark:bg-zinc-400"></span>
+              <span className="w-1.5 h-1.5 rounded-full bg-zinc-500 dark:bg-zinc-400"></span>
+              <span className="w-1.5 h-1.5 rounded-full bg-zinc-500 dark:bg-zinc-400"></span>
+            </div>
+          </div>
+
+          {/* Output Panel */}
+          <div 
+            style={{ width: `${100 - splitWidth}%` }}
+            className="card dark-editor-card flex flex-col overflow-hidden min-w-0"
+          >
+            <div className="border-b-2 border-zinc-200 dark:border-zinc-800 p-2.5 px-4 dark-terminal-header flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="hidden sm:flex items-center gap-1.5 mr-1">
+                  <span className="window-dot window-dot-red"></span>
+                  <span className="window-dot window-dot-yellow"></span>
+                  <span className="window-dot window-dot-green"></span>
+                </div>
+                <span className="font-bold text-xs uppercase tracking-wider font-mono">Beautified Output</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={copyOutput} 
+                  disabled={!outputCode}
+                  className="btn-terminal btn-spring disabled:opacity-40"
+                >
+                  {copied ? <Check size={12} className="text-green-600 animate-bounce" /> : <Copy size={12} />}
+                  <span className="ml-1">{copied ? 'Copied' : 'Copy'}</span>
+                </button>
+                <button 
+                  onClick={downloadCode} 
+                  disabled={!outputCode}
+                  className="btn-terminal btn-spring disabled:opacity-40"
+                  title="Download formatted file"
+                >
+                  <Download size={12} />
+                  <span className="ml-1 hidden sm:inline">Download</span>
+                </button>
+              </div>
+            </div>
+            <div className="flex-1 overflow-hidden">
+              <Editor
+                height="100%"
+                language={language === 'typescript' ? 'typescript' : language === 'json' ? 'json' : language}
+                value={outputCode}
+                loading={<EditorSkeleton label="Initializing Formatter Output..." />}
+                theme={theme === 'dark' ? 'vs-dark' : 'vs'}
+                options={{
+                  readOnly: true,
+                  minimap: { enabled: true },
+                  fontSize: 12,
+                  lineHeight: 18,
+                  fontFamily: "'JetBrains Mono', monospace",
+                  automaticLayout: true,
+                  scrollBeyondLastLine: false,
+                  wordWrap: 'on',
+                  tabSize: indentSize,
+                  padding: { top: 8, bottom: 8 }
+                }}
+              />
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

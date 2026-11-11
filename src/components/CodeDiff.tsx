@@ -26,6 +26,8 @@ import EditorSkeleton from './EditorSkeleton';
 import ChangeInspector from './ChangeInspector';
 import SecretShieldModal from './SecretShieldModal';
 import ToastContainer, { type ToastMessage } from './Toast';
+import MobileCodeEditor from './MobileCodeEditor';
+import MobileDiffViewer from './MobileDiffViewer';
 import { 
   computeDetailedDiff, 
   downloadPatchFile, 
@@ -191,6 +193,7 @@ ORDER BY total_revenue DESC;`
 export default function CodeDiff() {
   const { theme } = useTheme();
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
+  const [mobileTab, setMobileTab] = useState<'original' | 'modified' | 'diff'>('diff');
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -882,100 +885,196 @@ export default function CodeDiff() {
         </div>
       </div>
 
-      {/* Editor Panels Info & Action Buttons */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 shrink-0">
-        {/* Original Code Header */}
-        <div className="card p-2 px-4 flex items-center justify-between dark-terminal-header border-b-0 rounded-b-none">
-          <div className="flex items-center gap-3">
-            <div className="hidden sm:flex items-center gap-1.5 mr-1">
-              <span className="window-dot window-dot-red"></span>
-              <span className="window-dot window-dot-yellow"></span>
-              <span className="window-dot window-dot-green"></span>
-            </div>
-            <FileText size={15} className="text-zinc-400" />
-            <span className="font-bold text-xs uppercase tracking-wider font-mono">Original Code</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <label className="btn-terminal cursor-pointer btn-spring">
-              <Upload size={12} className="mr-1" />
-              Upload
-              <input 
-                type="file" 
-                onChange={(e) => handleFileUpload(e, 'original')}
-                className="hidden" 
-                accept=".txt,.js,.jsx,.ts,.tsx,.json,.css,.html,.sql,.py,.java,.cpp,.cc,.h,.cs,.php,.go,.rs,.rb,.swift,.kt,.dart,.r,.pl,.scala,.lua,.md,.sh,.xml,.yaml,.yml"
-              />
-            </label>
-            <button 
-              onClick={() => copyToClipboard(originalCode, setCopiedOriginal, 'Original code copied')} 
-              className="btn-terminal btn-spring"
+      {/* Mobile Workspace Mode vs Desktop Monaco Mode */}
+      {isMobile ? (
+        <div className="flex flex-col flex-1 min-h-0 gap-2">
+          {/* Mobile Tab Segmented Switcher */}
+          <div className="flex items-center bg-zinc-100 dark:bg-zinc-800 p-1 rounded-xl border border-zinc-200 dark:border-zinc-700 shrink-0 select-none">
+            <button
+              onClick={() => setMobileTab('original')}
+              className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-mono font-bold transition-all text-center flex items-center justify-center gap-1.5 ${
+                mobileTab === 'original' 
+                  ? 'bg-[#ff6b00] text-white shadow-xs' 
+                  : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
+              }`}
             >
-              {copiedOriginal ? <Check size={12} className="text-green-600" /> : <Copy size={12} />}
-              <span className="ml-1">{copiedOriginal ? 'Copied' : 'Copy'}</span>
+              <FileText size={13} />
+              <span>Original</span>
+            </button>
+            <button
+              onClick={() => setMobileTab('modified')}
+              className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-mono font-bold transition-all text-center flex items-center justify-center gap-1.5 ${
+                mobileTab === 'modified' 
+                  ? 'bg-[#ff6b00] text-white shadow-xs' 
+                  : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
+              }`}
+            >
+              <FileText size={13} />
+              <span>Modified</span>
+            </button>
+            <button
+              onClick={() => setMobileTab('diff')}
+              className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-mono font-bold transition-all text-center flex items-center justify-center gap-1.5 ${
+                mobileTab === 'diff' 
+                  ? 'bg-[#ff6b00] text-white shadow-xs' 
+                  : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
+              }`}
+            >
+              <ArrowLeftRight size={13} />
+              <span>Diff ({hunks.length})</span>
             </button>
           </div>
-        </div>
 
-        {/* Modified Code Header */}
-        <div className="card p-2 px-4 flex items-center justify-between dark-terminal-header border-b-0 rounded-b-none">
-          <div className="flex items-center gap-3">
-            <div className="hidden sm:flex items-center gap-1.5 mr-1">
-              <span className="window-dot window-dot-red"></span>
-              <span className="window-dot window-dot-yellow"></span>
-              <span className="window-dot window-dot-green"></span>
+          {/* Active Mobile Panel: View & Edit Files Easily on Touch Screens */}
+          {mobileTab === 'original' && (
+            <MobileCodeEditor
+              title="Original Code"
+              value={originalCode}
+              onChange={(val) => {
+                setOriginalCode(val);
+                if (diffEditorRef.current) {
+                  diffEditorRef.current.getOriginalEditor().setValue(val);
+                }
+              }}
+              language={language}
+              onFileUpload={(content, name) => {
+                setOriginalCode(content);
+                if (diffEditorRef.current) {
+                  diffEditorRef.current.getOriginalEditor().setValue(content);
+                }
+                addToast(`Uploaded ${name}`, 'Loaded into original editor', 'success');
+              }}
+            />
+          )}
+
+          {mobileTab === 'modified' && (
+            <MobileCodeEditor
+              title="Modified Code"
+              value={modifiedCode}
+              onChange={(val) => {
+                setModifiedCode(val);
+                if (diffEditorRef.current) {
+                  diffEditorRef.current.getModifiedEditor().setValue(val);
+                }
+              }}
+              language={language}
+              onFileUpload={(content, name) => {
+                setModifiedCode(content);
+                if (diffEditorRef.current) {
+                  diffEditorRef.current.getModifiedEditor().setValue(content);
+                }
+                addToast(`Uploaded ${name}`, 'Loaded into modified editor', 'success');
+              }}
+            />
+          )}
+
+          {mobileTab === 'diff' && (
+            <MobileDiffViewer
+              detailedDiff={detailedDiff}
+              originalCode={originalCode}
+              modifiedCode={modifiedCode}
+            />
+          )}
+        </div>
+      ) : (
+        /* Desktop Monaco Diff Workspace */
+        <>
+          {/* Editor Panels Info & Action Buttons */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 shrink-0">
+            {/* Original Code Header */}
+            <div className="card p-2 px-4 flex items-center justify-between dark-terminal-header border-b-0 rounded-b-none">
+              <div className="flex items-center gap-3">
+                <div className="hidden sm:flex items-center gap-1.5 mr-1">
+                  <span className="window-dot window-dot-red"></span>
+                  <span className="window-dot window-dot-yellow"></span>
+                  <span className="window-dot window-dot-green"></span>
+                </div>
+                <FileText size={15} className="text-zinc-400" />
+                <span className="font-bold text-xs uppercase tracking-wider font-mono">Original Code</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <label className="btn-terminal cursor-pointer btn-spring">
+                  <Upload size={12} className="mr-1" />
+                  Upload
+                  <input 
+                    type="file" 
+                    onChange={(e) => handleFileUpload(e, 'original')}
+                    className="hidden" 
+                    accept=".txt,.js,.jsx,.ts,.tsx,.json,.css,.html,.sql,.py,.java,.cpp,.cc,.h,.cs,.php,.go,.rs,.rb,.swift,.kt,.dart,.r,.pl,.scala,.lua,.md,.sh,.xml,.yaml,.yml"
+                  />
+                </label>
+                <button 
+                  onClick={() => copyToClipboard(originalCode, setCopiedOriginal, 'Original code copied')} 
+                  className="btn-terminal btn-spring"
+                >
+                  {copiedOriginal ? <Check size={12} className="text-green-600" /> : <Copy size={12} />}
+                  <span className="ml-1">{copiedOriginal ? 'Copied' : 'Copy'}</span>
+                </button>
+              </div>
             </div>
-            <FileText size={15} className="text-zinc-400" />
-            <span className="font-bold text-xs uppercase tracking-wider font-mono">Modified Code</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <label className="btn-terminal cursor-pointer btn-spring">
-              <Upload size={12} className="mr-1" />
-              Upload
-              <input 
-                type="file" 
-                onChange={(e) => handleFileUpload(e, 'modified')}
-                className="hidden"
-                accept=".txt,.js,.jsx,.ts,.tsx,.json,.css,.html,.sql,.py,.java,.cpp,.cc,.h,.cs,.php,.go,.rs,.rb,.swift,.kt,.dart,.r,.pl,.scala,.lua,.md,.sh,.xml,.yaml,.yml"
-              />
-            </label>
-            <button 
-              onClick={() => copyToClipboard(modifiedCode, setCopiedModified, 'Modified code copied')} 
-              className="btn-terminal btn-spring"
-            >
-              {copiedModified ? <Check size={12} className="text-green-600" /> : <Copy size={12} />}
-              <span className="ml-1">{copiedModified ? 'Copied' : 'Copy'}</span>
-            </button>
-          </div>
-        </div>
-      </div>
 
-      {/* Editor Container */}
-      <div className="card dark-editor-card flex-1 min-h-0 border-t-0 rounded-t-none relative">
-        <DiffEditor
-          height="100%"
-          language={language}
-          original={originalCode}
-          modified={modifiedCode}
-          onMount={handleEditorMount}
-          loading={<EditorSkeleton label="Aligning Diff Syntax Trees..." />}
-          theme={theme === 'dark' ? 'vs-dark' : 'vs'}
-          options={{
-            originalEditable: true,
-            readOnly: false,
-            renderSideBySide: splitView,
-            minimap: { enabled: !isMobile },
-            scrollBeyondLastLine: false,
-            fontSize: isMobile ? 11 : 12,
-            lineHeight: isMobile ? 16 : 18,
-            fontFamily: "'JetBrains Mono', monospace",
-            automaticLayout: true,
-            ignoreTrimWhitespace: ignoreWhitespace,
-            diffWordWrap: wordWrap ? 'on' : 'off',
-            wordWrap: wordWrap ? 'on' : 'off',
-            padding: { top: 8, bottom: 8 }
-          }}
-        />
-      </div>
+            {/* Modified Code Header */}
+            <div className="card p-2 px-4 flex items-center justify-between dark-terminal-header border-b-0 rounded-b-none">
+              <div className="flex items-center gap-3">
+                <div className="hidden sm:flex items-center gap-1.5 mr-1">
+                  <span className="window-dot window-dot-red"></span>
+                  <span className="window-dot window-dot-yellow"></span>
+                  <span className="window-dot window-dot-green"></span>
+                </div>
+                <FileText size={15} className="text-zinc-400" />
+                <span className="font-bold text-xs uppercase tracking-wider font-mono">Modified Code</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <label className="btn-terminal cursor-pointer btn-spring">
+                  <Upload size={12} className="mr-1" />
+                  Upload
+                  <input 
+                    type="file" 
+                    onChange={(e) => handleFileUpload(e, 'modified')}
+                    className="hidden" 
+                    accept=".txt,.js,.jsx,.ts,.tsx,.json,.css,.html,.sql,.py,.java,.cpp,.cc,.h,.cs,.php,.go,.rs,.rb,.swift,.kt,.dart,.r,.pl,.scala,.lua,.md,.sh,.xml,.yaml,.yml"
+                  />
+                </label>
+                <button 
+                  onClick={() => copyToClipboard(modifiedCode, setCopiedModified, 'Modified code copied')} 
+                  className="btn-terminal btn-spring"
+                >
+                  {copiedModified ? <Check size={12} className="text-green-600" /> : <Copy size={12} />}
+                  <span className="ml-1">{copiedModified ? 'Copied' : 'Copy'}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Editor Container */}
+          <div className="card dark-editor-card flex-1 min-h-0 border-t-0 rounded-t-none relative">
+            <DiffEditor
+              height="100%"
+              language={language}
+              original={originalCode}
+              modified={modifiedCode}
+              onMount={handleEditorMount}
+              loading={<EditorSkeleton label="Aligning Diff Syntax Trees..." />}
+              theme={theme === 'dark' ? 'vs-dark' : 'vs'}
+              options={{
+                originalEditable: true,
+                readOnly: false,
+                renderSideBySide: splitView,
+                minimap: { enabled: !isMobile },
+                scrollBeyondLastLine: false,
+                fontSize: 12,
+                lineHeight: 18,
+                fontFamily: "'JetBrains Mono', monospace",
+                automaticLayout: true,
+                ignoreTrimWhitespace: ignoreWhitespace,
+                diffWordWrap: wordWrap ? 'on' : 'off',
+                wordWrap: wordWrap ? 'on' : 'off',
+                padding: { top: 8, bottom: 8 }
+              }}
+            />
+          </div>
+        </>
+      )}
     </div>
   );
 }
