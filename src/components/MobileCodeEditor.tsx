@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef } from 'react';
 import { Copy, Check, Upload, Trash2, ClipboardPaste } from 'lucide-react';
 
 interface MobileCodeEditorProps {
